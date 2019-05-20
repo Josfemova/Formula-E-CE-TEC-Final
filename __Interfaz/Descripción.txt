@@ -1,0 +1,1 @@
+El archivo presente en este folder corresponde a la interfaz base/inicial del proyecto.
