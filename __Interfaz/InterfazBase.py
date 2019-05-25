@@ -72,8 +72,10 @@ seleccione un piloto e inicie su Test Drive.
 """
 #    __________________________
 #___/Importación de Bibliotecas
-from tkinter import * #Para el uso de labels, canvas, messagebox, etc
+from tkinter import * #Para el uso de labels, canvas, Photo, etc
 from tkinter import scrolledtext #para utilizar en la ventana about
+from tkinter import messagebox #Pop-up de mensajes
+from WiFiClient import NodeMCU #Comunicación WIFI con el carro.
 import os             #Para manejo de rutas
 import threading      #Asignación de hilos
 from threading import Thread
@@ -142,15 +144,19 @@ def about_window():
 def test_drive_window():
     TestDrive= Toplevel()
     TestDrive.title("Test Drive")
-    TestDrive.minsize(width= 800, height = 600)
+    TestDrive.geometry("1280x720")
     TestDrive.resizable(width= NO, height= NO)
     #Se genera el canvas de la ventana de pruebas
-    TestCanv= Canvas(TestDrive, width= 800, height= 600,bg="grey")
+    TestCanv= Canvas(TestDrive, width= 1280, height= 720,bg="black")
     TestCanv.place(x=0, y=0)
+    FondoTest = cargar_imagen("POV.png")
+    TestCanv.create_image(1,1,image=FondoTest, anchor = NW,state = NORMAL)
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
     #Para ello se define una función al igual que en la ventana About
+    #myCar = NodeMCU()
+    #myCar.start()
     def btn_back2():
         TestDrive.destroy()
         Main.deiconify()
