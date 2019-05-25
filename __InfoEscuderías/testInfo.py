@@ -2,9 +2,7 @@
 
 class main_Pilotos():
 
-    def __init__(self, lstInfoPiloto = [], posPiloto = False):
-        self.listInfoPiloto = lstInfoPiloto
-        self.posPiloto = posPiloto
+    def __init__(self):
         self.pilotoInfo =[]
         self.IGE = 0
         self.refrescar()
@@ -18,8 +16,11 @@ class main_Pilotos():
         for x in filas:
             fila = x.split(";")
             fila[len(fila)-1] = fila[len(fila)-1].replace("\n","")
-            for i in range(4, len(fila)):
+            for i in range(4, 8):
                 fila[i] = int(fila[i])
+            for i in range(8,len(fila)):
+                fila[i] = float(fila[i])
+                
             fila = self.addRGP_REP(fila)
             self.pilotoInfo.append(fila)
         txtEscud.close()
@@ -58,3 +59,65 @@ class main_Pilotos():
             victorias+= piloto[6]
             participaciones += piloto[4]
         self.IGE = victorias/participaciones
+
+    def agregarPiloto(self,infoPiloto):
+        return
+
+    def actualizarArchivo(self):
+        txtEscud = open("EscuderiaInfo.txt","w")
+        src = self.pilotoInfo
+        datos = ""
+        for piloto in src:
+            line = ""
+            for x in piloto:
+                if type(x) is int or type(x) is float:
+                    x = str(x)
+                line+= x + ";"
+            line = line[0:-1] + '\n'
+            datos += line
+
+        txtEscud.write(datos)
+        self.refrescar()
+
+
+    def ordenar(self, matriz = "", param = "RGP"):
+        if param == "RGP":
+            param = 8
+        elif param == "REP":
+            param = 9
+        else:
+            return "Error, parametro invalido"
+        
+        if matriz == "":
+            matriz = self.pilotoInfo
+        elif matriz == []:
+            return []
+
+        def partir(pilotos, pivote):
+            menores = []
+            
+            iguales = []
+            mayores = []
+            for x in pilotos:
+                if x[param] < pivote:
+                    menores.append(x)
+                elif x[param] == pivote:
+                    iguales.append(x)
+                elif x[param] > pivote:
+                    mayores.append(x)
+            return menores, iguales,  mayores
+        
+        menores, iguales, mayores = partir(matriz, matriz[0][param])
+        ret = self.ordenar(menores)
+        ret.extend(iguales)
+        ret.extend(self.ordenar(mayores))
+        return ret
+    
+        
+                
+            
+            
+        
+        
+        
+        
