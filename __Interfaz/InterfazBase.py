@@ -162,7 +162,8 @@ def test_drive_window():
         Main.deiconify()
         
     BtnBack2= Button(TestCanv, text = "Main", command = btn_back2, fg= "cyan", bg= "black")
-    BtnBack2.place(x= 400, y =300)
+    BtnBack2.place(x= 1100, y =600)
+    TestDrive.mainloop()
 
 #-----Se termina la ventana de pruebas y se define la de los pilotos
 def pilots_window():
@@ -182,6 +183,7 @@ def pilots_window():
         
     BtnBack3= Button(PilotsCanv, text ="Main", command = btn_back3, fg= "cyan", bg = "black")
     BtnBack3.place(x= 200, y =100)
+    Pilots.mainloop()
 
 #------Comandos de los Botones en Main------
 BtnAbout= Button(MainCanv, text= "About", command = btn_about,fg= "cyan",bg ="black") #Para ir a About
