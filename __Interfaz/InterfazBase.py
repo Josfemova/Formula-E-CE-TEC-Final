@@ -135,7 +135,7 @@ def about_window():
         Main.deiconify() #Recargar la ventana principal
         
     BtnBack1 = Button(AboutCanv, text= "Main", command = btn_back1,fg = "cyan", bg= "black")
-    BtnBack1.place(x = 800, y = 300)
+    BtnBack1.place(x = 600, y = 500)
     About.mainloop()
 
 #-----Se termina la venta about y se define la ventana de pruebas
