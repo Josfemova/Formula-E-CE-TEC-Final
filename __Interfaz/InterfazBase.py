@@ -150,7 +150,9 @@ def test_drive_window():
     TestCanv= Canvas(TestDrive, width= 1280, height= 720,bg="black")
     TestCanv.place(x=0, y=0)
     FondoTest = cargar_imagen("POV.png")
-    TestCanv.create_image(1,1,image=FondoTest, anchor = NW,state = NORMAL)
+    TestCanv.create_image(0,0,image=FondoTest, anchor = NW,state = NORMAL)
+    Borde = cargar_imagen("Outline1.png")
+    TestCanv.create_image(800,300, image = Borde, anchor = NW,state = NORMAL)
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
