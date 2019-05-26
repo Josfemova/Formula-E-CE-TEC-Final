@@ -180,14 +180,14 @@ def test_drive_window():
     def send(Msg):
         """
         Función send para enviar comandos al Node
-        Esta funcion es una modificación a la dada en el archivo TelemetryLog
+        Esta funcion es una modificación a la dada en el archivo TelemetryLog por Santiago Gamboa (Asistente del Curso)
         """
         if(len(Msg)>0 and Msg[-1] == ";"):
             myCar.send(Msg)
         else:
             return
     def WASD_Press(event):
-        global Pressed, pwmBack, Pot, NotMoving, DirR, DirL
+        global Pressed, pwmBack, Pot, NotMoving, DirR, DirL, BlinkZ, BlinkC
         Key = event.char #Estoy asigna la presión de una tecla a la variable Key.
         Pressed = True
         if Key == "w": #Se debe manejar con strings pues es el argumento que maneja "char".
@@ -198,10 +198,10 @@ def test_drive_window():
             else:
                 return
         elif Key == "s":
-            if Pressed and (not pwmBack):
+            if Pressed and not(NotMoving):
                 ThreadDecel = Thread(target = gradual_decel)
                 ThreadDecel.start()
-            elif Pressed and pwmBack:
+            elif Pressed and NotMoving:
                 Pot = -850
                 send("pwm:" + str(Pot) + ";")
             else:
@@ -211,51 +211,114 @@ def test_drive_window():
             if DirR:
                 return
             else:
-                #Código para que las luces hagan parpadeo
-                send("dir:-1;")
+                if Pressed:
+                    send("dir:-1;")
             #Se tiene que meter lo de cambiar las imágenes
-                return
+                else:
+                    return
         elif Key == "d":
             DirR = True
             if DirL:
                 return
             else:
-                #Código para que las luces hagan parpadeo
-                send("dir:1;")
+                if Pressed:
+                    send("dir:1;")
+                else:
+                    return
+        elif Key == "z":
+            if Pressed:
+                BlinkZ = True
+                BlinkC = False
+                thread_blink(-1)
+                
+        elif Key == "c":
+            if Pressed:
+                BlinkC = True
+                BlinkZ = False
+                thread_blink(1)
+        elif Key == "x":
+            if Pressed:
+                BlinkC = False
+                BlinkZ = False
         else:
             return #Se llega a esta línea cuando hay algún evento de caracteres en el teclado, pero es insignificante para el comportamiento del carro (ejemplo, la H)
-            
-    #Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
+    #-------------------------------------------
+    def thread_blink(Dir):
+        global BlinkZ, BlinkC
+        if BlinkZ:
+            BlinkC = False
+            ThreadBlink = Thread(target =blink_lights, args = [Dir, 1])
+            ThreadBlink.start()
+        elif BlinkC:
+            BlinkZ = False
+            ThreadBlink = Thread(target =blink_lights, args = [Dir,1])
+            ThreadBlink.start()
+        else:
+            return
+    def blink_lights(Direction,Timer):
+        LedStatus = Timer%2
+        if Direction == -1:
+            while Timer < 101 and BlinkZ:
+                send("ll:" + str(LedStatus) + ";")
+                Timer += 1
+                time.sleep(0.5)
+                print("Left")
+            send("ll:" + str(LedStatus) + ";")
+        elif Direction == 1:
+            while Timer < 101 and BlinkC:
+                send("lr:" + str(LedStatus) + ";")
+                Timer += 1
+                time.sleep(0.5)
+                print("Right")
+            send("lr:" + str(LedStatus) + ";")
+        else:
+            return
     def gradual_accel():
-        global Pot 
+        """
+    Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
+    """
+        global Pot, NotMoving
+        NotMoving = False
         while Pot < 1023:
             Pot += 101
             send("pwm:" + str(Pot) +";")
             time.sleep(0.25)
         Pot = 1023
         send("pwm:" + str(Pot) + ";")
+    #---------------------------------------
 
+        
     def gradual_decel():
-        global pot, pwmBack
-        while pot > 0:
-            pot -= 120
+        global Pot, pwmBack, NotMoving
+        NotMoving = False
+        pwmBack = True
+        while Pot > 0:
+            Pot -= 120
             send("pwm:" + str(Pot) + ";")
             time.sleep(0.25)
         Pot = 0
         send("pwm:" + str(Pot) + ";") #para dejar el carro en 0 una vez que se alcanza ese valor y luego empezar a dar reversa.
-        pwmBack = True
+        NotMoving = True
+    #-----------------------------------------
+        
         
     def WASD_Release(event):
         global Pot, pwmBack, DirL, DirR, Pressed
         Key = event.char
         Pressed = False
-        if (Key == "w"):
+        if (Key == "w") or (Key == "s"):
             if not Pressed:
                 ThreadStop = Thread(target = gradual_pullover)
                 ThreadStop.start()
             else:
                 return
-            return
+        elif (Key == "a") or (Key == "d"):
+            DirL = False
+            DirR = False
+            #Código para detener el parpadeo
+            send("dir:0;")
+    #------------------------------------------------
+
         
     def gradual_pullover():
         """
@@ -275,7 +338,8 @@ def test_drive_window():
                 send("pwm:" + str(Pot) + ";")
                 time.sleep(0.25)
             Pot = 0
-            send("pwm:" + str(pot) + ";")
+            send("pwm:" + str(Pot) + ";")
+    #----------------------------------------------------------
 
             
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
