@@ -81,7 +81,10 @@ import threading      #Asignación de hilos
 from threading import Thread
 import time           #time.sleep() para delays
 import random         #En caso que sea necesario generar algún dato en aleatorio
-#global
+global pot, NotMoving, pwmBack
+pot = 0
+NotMoving = True
+pwmBack = False
 
 #    ____________________________
 #___/Función para cargar imágenes
@@ -153,9 +156,9 @@ def test_drive_window():
     TestCanv.create_image(0,0,image=FondoTest, anchor = NW,state = NORMAL)
     Borde = cargar_imagen("Car1.png")
     TestCanv.create_image(925,200, image = Borde, anchor = NW,state = NORMAL)
-    TestCanv.create_text(60,300, text = "LouiVckr",font = "Consolas")
-    TestCanv.create_text(600,15, text = "NombreCarro", font = "Consolas")
-    TestCanv.create_text(600,655, text = "PWM:", font= ("Consolas",15), fill = "White")
+    TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White")
+    TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White")
+    TestCanv.create_text(603,657, text = "PWM:" + str(pot), font= ("Consolas",18), fill = "White")
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -181,21 +184,37 @@ def test_drive_window():
         else:
             return
     def WASD_Press(event):
-        Key = event.char
-        if Key == "w":
-            #Manejo de la muestra de ciertas imágenes dependiendo de la condición de la tecla
-            #Aquí se especifica qué imágenes deben aparecer al presionar esta tecla con tags y comando state.
-
-            #Se genera un hilo para llamar a una función que genera una aceleración gradual en el auto.
-            return
-        else:
-            return
+        Key = event.char #Estoy asigna la presión de una tecla a la variable Key.
+        if Key == "w": #Se debe manejar con strings pues es el argumento que maneja "char".
+            #Hacer una aceleración gradual, para esto se utiliza una función aparte.
+            if Pressed:
+                ThreadAccel = Thread(target = gradual_accel)
+                ThreadAccel.start()
+            else:
+                return
+        elif Key == "s":
+            if Pressed:
+                while pot > 0:
+                    pot -=100
+                    send("pwm:" + str(pot) + ";")
+                    time.sleep(0.25)
+                send("pwm:" + str(pot) + ";")
+            else:
+                return
+    #Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
+    def GradualAcceleration():
+        global pot 
+        while pot < 1023:
+            pot += 101
+            send("pwm:" + str(pot) +";")
+            time.sleep(0.25)
+        send("pwm:" + str(pot) + ";")
     def WASD_Release(event):
         Key = event.char
         if Key == "w":
             return
-    test_drive_window.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
-    test_drive_window.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
+    TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
+    TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
     
     
     TestDrive.mainloop()
