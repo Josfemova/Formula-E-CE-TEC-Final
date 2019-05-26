@@ -111,6 +111,7 @@ def send (event):
         messagebox.showwarning("Error del mensaje", "Mensaje sin caracter de finalización (';')") 
 
 
+
 def sendShowID():
     """
     Ejemplo como capturar un ID de un mensaje específico.

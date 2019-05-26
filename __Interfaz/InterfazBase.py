@@ -81,10 +81,13 @@ import threading      #Asignación de hilos
 from threading import Thread
 import time           #time.sleep() para delays
 import random         #En caso que sea necesario generar algún dato en aleatorio
-global pot, NotMoving, pwmBack
-pot = 0
+global Pot, NotMoving, pwmBack, Pressed,DirR,DirL
+Pot = 0
 NotMoving = True
 pwmBack = False
+Pressed = False
+DirR = False
+DirL = False
 
 #    ____________________________
 #___/Función para cargar imágenes
@@ -158,7 +161,7 @@ def test_drive_window():
     TestCanv.create_image(925,200, image = Borde, anchor = NW,state = NORMAL)
     TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White")
     TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White")
-    TestCanv.create_text(603,657, text = "PWM:" + str(pot), font= ("Consolas",18), fill = "White")
+    TestCanv.create_text(603,657, text = "PWM:" + str(Pot), font= ("Consolas",18), fill = "White")
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -184,7 +187,9 @@ def test_drive_window():
         else:
             return
     def WASD_Press(event):
+        global Pressed, pwmBack, Pot, NotMoving, DirR, DirL
         Key = event.char #Estoy asigna la presión de una tecla a la variable Key.
+        Pressed = True
         if Key == "w": #Se debe manejar con strings pues es el argumento que maneja "char".
             #Hacer una aceleración gradual, para esto se utiliza una función aparte.
             if Pressed:
@@ -193,26 +198,86 @@ def test_drive_window():
             else:
                 return
         elif Key == "s":
-            if Pressed:
-                while pot > 0:
-                    pot -=100
-                    send("pwm:" + str(pot) + ";")
-                    time.sleep(0.25)
-                send("pwm:" + str(pot) + ";")
+            if Pressed and (not pwmBack):
+                ThreadDecel = Thread(target = gradual_decel)
+                ThreadDecel.start()
+            elif Pressed and pwmBack:
+                Pot = -850
+                send("pwm:" + str(Pot) + ";")
             else:
                 return
+        elif Key == "a":
+            DirL = True
+            if DirR:
+                return
+            else:
+                #Código para que las luces hagan parpadeo
+                send("dir:-1;")
+            #Se tiene que meter lo de cambiar las imágenes
+                return
+        elif Key == "d":
+            DirR = True
+            if DirL:
+                return
+            else:
+                #Código para que las luces hagan parpadeo
+                send("dir:1;")
+        else:
+            return #Se llega a esta línea cuando hay algún evento de caracteres en el teclado, pero es insignificante para el comportamiento del carro (ejemplo, la H)
+            
     #Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
-    def GradualAcceleration():
-        global pot 
-        while pot < 1023:
-            pot += 101
-            send("pwm:" + str(pot) +";")
+    def gradual_accel():
+        global Pot 
+        while Pot < 1023:
+            Pot += 101
+            send("pwm:" + str(Pot) +";")
             time.sleep(0.25)
-        send("pwm:" + str(pot) + ";")
+        Pot = 1023
+        send("pwm:" + str(Pot) + ";")
+
+    def gradual_decel():
+        global pot, pwmBack
+        while pot > 0:
+            pot -= 120
+            send("pwm:" + str(Pot) + ";")
+            time.sleep(0.25)
+        Pot = 0
+        send("pwm:" + str(Pot) + ";") #para dejar el carro en 0 una vez que se alcanza ese valor y luego empezar a dar reversa.
+        pwmBack = True
+        
     def WASD_Release(event):
+        global Pot, pwmBack, DirL, DirR, Pressed
         Key = event.char
-        if Key == "w":
+        Pressed = False
+        if (Key == "w"):
+            if not Pressed:
+                ThreadStop = Thread(target = gradual_pullover)
+                ThreadStop.start()
+            else:
+                return
             return
+        
+    def gradual_pullover():
+        """
+        Función para detener el auto cuando se sueltan las teclas de movimientos acc/reversa
+        """
+        global Pot
+        if Pot > 0:
+            while Pot > 0:
+                Pot -= 80
+                send("pwm:" + str(Pot) + ";")
+                time.sleep(0.25)
+            Pot = 0
+            send("pwm:" + str(Pot) + ";")
+        else:
+            while Pot < 0:
+                Pot += 80
+                send("pwm:" + str(Pot) + ";")
+                time.sleep(0.25)
+            Pot = 0
+            send("pwm:" + str(pot) + ";")
+
+            
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
     TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
     
