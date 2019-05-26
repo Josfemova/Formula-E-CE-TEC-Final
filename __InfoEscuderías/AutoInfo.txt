@@ -1,2 +1,2 @@
-marca;modelo;pais;foto;temporada;cntbaterias;pilasporbateria;Voltage por bateria; [disponible,descargado,reparación];consumo motores; sensores;peso del carro; eficiencia(Vf\Vi x 100)
-Nissan;GTR;Japon;ruta;2019;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg, 100%
+Toyota;AE86;Japon;c:\somefolder;1986;4;6;3V;RETIRADO;100W;SENSORS;20KG;5.0
+Nissan;GTR;Japon;ruta;2019;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;10.0
