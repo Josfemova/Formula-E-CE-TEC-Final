@@ -116,6 +116,9 @@ def btn_pilots():
     Main.withdraw()
     pilots_window()
 
+def btn_back(Window):
+    Window.destroy()
+    Main.deiconify()
 
 #    _____________
 #___/ventana about
@@ -132,11 +135,8 @@ def about_window():
     FotoAle = cargar_imagen("AlejandroPrueba.png")
     AboutCanv.create_image(1,1,image=FotoAle,anchor = NW)
     #Se define una función para el botón de atrás a la principal
-    def btn_back1():
-        About.destroy()
-        Main.deiconify() #Recargar la ventana principal
         
-    BtnBack1 = Button(AboutCanv, text= "Main", command = btn_back1,fg = "cyan", bg= "black")
+    BtnBack1 =  Button(AboutCanv, text= "Main",command =lambda: btn_back(About),fg = "cyan", bg= "black")
     BtnBack1.place(x = 600, y = 500)
     About.mainloop()
 
@@ -151,20 +151,53 @@ def test_drive_window():
     TestCanv.place(x=0, y=0)
     FondoTest = cargar_imagen("POV.png")
     TestCanv.create_image(0,0,image=FondoTest, anchor = NW,state = NORMAL)
-    Borde = cargar_imagen("Outline1.png")
-    TestCanv.create_image(800,300, image = Borde, anchor = NW,state = NORMAL)
+    Borde = cargar_imagen("Car1.png")
+    TestCanv.create_image(925,200, image = Borde, anchor = NW,state = NORMAL)
+    TestCanv.create_text(60,300, text = "LouiVckr",font = "Consolas")
+    TestCanv.create_text(600,15, text = "NombreCarro", font = "Consolas")
+    TestCanv.create_text(600,655, text = "PWM:", font= ("Consolas",15), fill = "White")
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
     #Para ello se define una función al igual que en la ventana About
-    #myCar = NodeMCU()
-    #myCar.start()
-    def btn_back2():
-        TestDrive.destroy()
-        Main.deiconify()
-        
-    BtnBack2= Button(TestCanv, text = "Main", command = btn_back2, fg= "cyan", bg= "black")
+    myCar = NodeMCU()
+    myCar.start()
+      
+    BtnBack2= Button(TestCanv, text = "Main", command = lambda: btn_back(TestDrive), fg= "cyan", bg= "black")
     BtnBack2.place(x= 1100, y =600)
+
+    #Código para trabajar los casos con las teclas de movimiento
+    #Se define un evento de mapeo de teclas para la ventana:
+    
+    #Función send para enviar los comandos al NodeMCU
+    #Esta función es una modificación a la dada en el archivo TelemetryLog por Santiago Gamboa
+    def send(Msg):
+        """
+        Función send para enviar comandos al Node
+        Esta funcion es una modificación a la dada en el archivo TelemetryLog
+        """
+        if(len(Msg)>0 and Msg[-1] == ";"):
+            myCar.send(Msg)
+        else:
+            return
+    def WASD_Press(event):
+        Key = event.char
+        if Key == "w":
+            #Manejo de la muestra de ciertas imágenes dependiendo de la condición de la tecla
+            #Aquí se especifica qué imágenes deben aparecer al presionar esta tecla con tags y comando state.
+
+            #Se genera un hilo para llamar a una función que genera una aceleración gradual en el auto.
+            return
+        else:
+            return
+    def WASD_Release(event):
+        Key = event.char
+        if Key == "w":
+            return
+    test_drive_window.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
+    test_drive_window.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
+    
+    
     TestDrive.mainloop()
 
 #-----Se termina la ventana de pruebas y se define la de los pilotos
@@ -179,11 +212,8 @@ def pilots_window():
     #Se debe programar el resto del funcionamiento del módulo antes de declararlo como listo
 
     #Por ahora se tiene el botón de atras:
-    def btn_back3():
-        Pilots.destroy()
-        Main.deiconify()
         
-    BtnBack3= Button(PilotsCanv, text ="Main", command = btn_back3, fg= "cyan", bg = "black")
+    BtnBack3= Button(PilotsCanv, text ="Main",command = lambda: btn_back(Pilots), fg= "cyan", bg = "black")
     BtnBack3.place(x= 200, y =100)
     Pilots.mainloop()
 
