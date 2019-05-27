@@ -169,6 +169,12 @@ def test_drive_window():
     Escudería = TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White")
     NombreCarro = TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White")
     Potencia = TestCanv.create_text(603,657, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm")
+    FrontLight = cargar_imagen("FrontL.png")
+    TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
+    TestCanv.create_image(1030,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
+    DirLight = cargar_imagen("EmL.png")
+    TestCanv.create_image(962,300, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
+    TestCanv.create_image(1028,300, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -252,6 +258,7 @@ def test_drive_window():
             if Pressed and (BlinkC or BlinkZ):
                 BlinkC = False
                 BlinkZ = False
+                TestCanv.itemconfig(("left","right"), state = HIDDEN)
             else:
                 return
         elif Key == "f": #Front para luces, PressF para la tecla
@@ -262,11 +269,11 @@ def test_drive_window():
                 if Front:
                     send("lf:1;")
                     Front = False
-                    print("on")
+                    TestCanv.itemconfig("front", state = NORMAL)
                 else:
                     send("lf:0;")
                     Front = True
-                    print("off")
+                    TestCanv.itemconfig("front", state = HIDDEN)
         else:
             return #Se llega a esta línea cuando hay algún evento de caracteres en el teclado, pero es insignificante para el comportamiento del carro (ejemplo, la H)
     #-------------------------------------------
@@ -274,22 +281,26 @@ def test_drive_window():
         global BlinkZ, BlinkC
         if BlinkZ:
             BlinkC = False
-            ThreadBlink = Thread(target =blink_lights, args = [Dir, 1])
+            ThreadBlink = Thread(target =blink_lights, args = [Dir, 0])
             ThreadBlink.start()
         elif BlinkC:
             BlinkZ = False
-            ThreadBlink = Thread(target =blink_lights, args = [Dir,1])
+            ThreadBlink = Thread(target =blink_lights, args = [Dir,0])
             ThreadBlink.start()
         else:
             return
     def blink_lights(Direction,Timer):
-        LedStatus = Timer%2
         if Direction == -1:
             while Timer < 101 and BlinkZ:
+                LedStatus = Timer%2
                 send("ll:" + str(LedStatus) + ";")
                 Timer += 1
+                print(LedStatus)
+                if LedStatus == 1:
+                    TestCanv.itemconfig("left", state = NORMAL)
+                else:
+                    TestCanv.itemconfig("left", state = HIDDEN)
                 time.sleep(0.5)
-                print("Left")
             send("ll:" + str(LedStatus) + ";")
         elif Direction == 1:
             while Timer < 101 and BlinkC:
