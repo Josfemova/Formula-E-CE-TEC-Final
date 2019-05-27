@@ -81,13 +81,7 @@ import threading      #Asignación de hilos
 from threading import Thread
 import time           #time.sleep() para delays
 import random         #En caso que sea necesario generar algún dato en aleatorio
-global Pot, NotMoving, pwmBack, Pressed,DirR,DirL
-Pot = 0
-NotMoving = True
-pwmBack = False
-Pressed = False
-DirR = False
-DirL = False
+
 
 #    ____________________________
 #___/Función para cargar imágenes
@@ -148,6 +142,19 @@ def about_window():
 
 #-----Se termina la venta about y se define la ventana de pruebas
 def test_drive_window():
+    #Variables globales para el funcionamiento de la ventana
+    global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front
+    Pot = 0
+    NotMoving = True
+    Pressed = False
+    DirR = False
+    DirL = False
+    BlinkC = False
+    BlinkZ = False
+    PressW = False
+    PressS = False
+    PressF = False
+    Front = True
     TestDrive= Toplevel()
     TestDrive.title("Test Drive")
     TestDrive.geometry("1280x720")
@@ -158,10 +165,10 @@ def test_drive_window():
     FondoTest = cargar_imagen("POV.png")
     TestCanv.create_image(0,0,image=FondoTest, anchor = NW,state = NORMAL)
     Borde = cargar_imagen("Car1.png")
-    TestCanv.create_image(925,200, image = Borde, anchor = NW,state = NORMAL)
-    TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White")
-    TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White")
-    TestCanv.create_text(603,657, text = "PWM:" + str(Pot), font= ("Consolas",18), fill = "White")
+    TestCanv.create_image(925,200, image = Borde, anchor = NW,tags = ("fondo","día"))
+    Escudería = TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White")
+    NombreCarro = TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White")
+    Potencia = TestCanv.create_text(603,657, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm")
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -186,24 +193,25 @@ def test_drive_window():
             myCar.send(Msg)
         else:
             return
+        
     def WASD_Press(event):
-        global Pressed, pwmBack, Pot, NotMoving, DirR, DirL, BlinkZ, BlinkC
+        global Pressed, Pot, NotMoving, DirR, DirL, BlinkZ, BlinkC, PressS, PressW, PressF, Front
         Key = event.char #Estoy asigna la presión de una tecla a la variable Key.
         Pressed = True
         if Key == "w": #Se debe manejar con strings pues es el argumento que maneja "char".
             #Hacer una aceleración gradual, para esto se utiliza una función aparte.
-            if Pressed:
+            if Pressed and not(PressW):
                 ThreadAccel = Thread(target = gradual_accel)
                 ThreadAccel.start()
             else:
                 return
         elif Key == "s":
-            if Pressed and not(NotMoving):
+            if Pressed and not(NotMoving) and not(PressS):
                 ThreadDecel = Thread(target = gradual_decel)
                 ThreadDecel.start()
-            elif Pressed and NotMoving:
-                Pot = -850
-                send("pwm:" + str(Pot) + ";")
+            elif Pressed and NotMoving and not(PressS):
+                ThreadBack = Thread(target = gradual_reverse)
+                ThreadBack.start()
             else:
                 return
         elif Key == "a":
@@ -226,20 +234,39 @@ def test_drive_window():
                 else:
                     return
         elif Key == "z":
-            if Pressed:
+            if Pressed and not(BlinkZ):
                 BlinkZ = True
                 BlinkC = False
                 thread_blink(-1)
+            else:
+                return
                 
         elif Key == "c":
-            if Pressed:
+            if Pressed and not(BlinkC):
                 BlinkC = True
                 BlinkZ = False
                 thread_blink(1)
+            else:
+                return
         elif Key == "x":
-            if Pressed:
+            if Pressed and (BlinkC or BlinkZ):
                 BlinkC = False
                 BlinkZ = False
+            else:
+                return
+        elif Key == "f": #Front para luces, PressF para la tecla
+            if PressF:
+                return
+            else:
+                PressF = True
+                if Front:
+                    send("lf:1;")
+                    Front = False
+                    print("on")
+                else:
+                    send("lf:0;")
+                    Front = True
+                    print("off")
         else:
             return #Se llega a esta línea cuando hay algún evento de caracteres en el teclado, pero es insignificante para el comportamiento del carro (ejemplo, la H)
     #-------------------------------------------
@@ -277,46 +304,66 @@ def test_drive_window():
         """
     Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
     """
-        global Pot, NotMoving
+        global Pot, NotMoving, Pressed, PressW
         NotMoving = False
-        while Pot < 1023:
-            Pot += 101
+        PressW = True
+        while Pot <= 900 and Pressed:
+            Pot += 100
             send("pwm:" + str(Pot) +";")
-            time.sleep(0.25)
-        Pot = 1023
+            time.sleep(0.5)
+            TestCanv.itemconfig(Potencia, text = ("PWM:" + str(Pot//10) +"%"))
         send("pwm:" + str(Pot) + ";")
+        TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
     #---------------------------------------
 
         
     def gradual_decel():
-        global Pot, pwmBack, NotMoving
+        global Pot, NotMoving,PressS
         NotMoving = False
-        pwmBack = True
-        while Pot > 0:
-            Pot -= 120
+        PressS = True
+        while Pot > 0 and Pressed:
+            Pot -= 100
             send("pwm:" + str(Pot) + ";")
-            time.sleep(0.25)
+            TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
+            time.sleep(0.5)
         Pot = 0
         send("pwm:" + str(Pot) + ";") #para dejar el carro en 0 una vez que se alcanza ese valor y luego empezar a dar reversa.
+        TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
         NotMoving = True
+        PressS = False
     #-----------------------------------------
+    def gradual_reverse():
+        global Pot, NotMoving, Pressed, PressS
+        NotMoving = False
+        PressS = True
+        while -900<Pot<=0 and Pressed:
+            Pot -= 100
+            send("pwm:" + str(Pot) + ";")
+            TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
+            time.sleep(0.5)
+        send("pwm:" + str(Pot) + ";")
+        TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
         
         
     def WASD_Release(event):
-        global Pot, pwmBack, DirL, DirR, Pressed
+        global Pot, pwmBack, DirL, DirR, Pressed, NotMoving, PressW, PressS, PressF
         Key = event.char
         Pressed = False
         if (Key == "w") or (Key == "s"):
-            if not Pressed:
+            PressW = False
+            PressS = False
+            if NotMoving:
+                return
+            else:
                 ThreadStop = Thread(target = gradual_pullover)
                 ThreadStop.start()
-            else:
-                return
         elif (Key == "a") or (Key == "d"):
             DirL = False
             DirR = False
             #Código para detener el parpadeo
             send("dir:0;")
+        elif Key == "f":
+            PressF = False
     #------------------------------------------------
 
         
@@ -324,21 +371,28 @@ def test_drive_window():
         """
         Función para detener el auto cuando se sueltan las teclas de movimientos acc/reversa
         """
-        global Pot
+        global Pot, NotMoving, Pressed
         if Pot > 0:
-            while Pot > 0:
-                Pot -= 80
+            while Pot > 0 and not(Pressed):
+                Pot -= 100
                 send("pwm:" + str(Pot) + ";")
-                time.sleep(0.25)
+                TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
+                time.sleep(0.5)
             Pot = 0
             send("pwm:" + str(Pot) + ";")
+            TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
+            NotMoving = True
+            
         else:
-            while Pot < 0:
-                Pot += 80
+            while Pot < 0 and not(Pressed):
+                Pot += 100
                 send("pwm:" + str(Pot) + ";")
+                TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
                 time.sleep(0.25)
             Pot = 0
             send("pwm:" + str(Pot) + ";")
+            TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
+            NotMoving = True
     #----------------------------------------------------------
 
             
