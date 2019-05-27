@@ -118,10 +118,10 @@ class main_Pilotos:
         else:
             return "parametro de tipo incorrecto"
 
-    def ordenar_aux(self, matriz = "", param = "RGP"):
-        if param == "RGP":
+    def ordenar_aux(self, matriz = "", paramcd = "RGP"):
+        if paramcd == "RGP":
             param = self.iRGP
-        elif param == "REP":
+        elif paramcd == "REP":
             param = self.iREP
         else:
             return "Error, parametro invalido"
@@ -145,9 +145,9 @@ class main_Pilotos:
             return menores, iguales,  mayores
         
         menores, iguales, mayores = partir(matriz, matriz[0][param])
-        ret = self.ordenar_aux(menores)
+        ret = self.ordenar_aux(menores,paramcd)
         ret.extend(iguales)
-        ret.extend(self.ordenar_aux(mayores))
+        ret.extend(self.ordenar_aux(mayores,paramcd))
         return ret
 
     def getCelebracion(self, posPiloto):
