@@ -94,15 +94,16 @@ def cargar_imagen(Nombre):
 #___/Creación de Ventana Principal
 Main = Tk() #Se asigna una función de Tkinter al nombre Main
 Main.title("Home")
-Main.geometry('800x600')
+Main.geometry('1280x720')
 Main.resizable(width=NO,height=NO)
 
 #    _______________________________
 #___/Canvas para trabajar la ventana
-MainCanv = Canvas(Main,width=1370,height=768,bg="grey")
+MainCanv = Canvas(Main,width=1280,height=720,bg="grey")
 MainCanv.place(x=0,y=0)
 
-#Insertar código que cargue la imagen del fondo en el canvas
+MainBG = cargar_imagen("MainFondo.png")
+MainCanv.create_image(0,0,image= MainBG, anchor = NW)
 
 def btn_about():
     Main.withdraw()
@@ -143,7 +144,7 @@ def about_window():
 #-----Se termina la venta about y se define la ventana de pruebas
 def test_drive_window():
     #Variables globales para el funcionamiento de la ventana
-    global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front
+    global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front, BackON
     Pot = 0
     NotMoving = True
     Pressed = False
@@ -155,6 +156,8 @@ def test_drive_window():
     PressS = False
     PressF = False
     Front = True
+    BackON = True
+    #*****************
     TestDrive= Toplevel()
     TestDrive.title("Test Drive")
     TestDrive.geometry("1280x720")
@@ -173,8 +176,11 @@ def test_drive_window():
     TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
     TestCanv.create_image(1030,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
     DirLight = cargar_imagen("EmL.png")
-    TestCanv.create_image(962,300, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
-    TestCanv.create_image(1028,300, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
+    TestCanv.create_image(940,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
+    TestCanv.create_image(1030,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
+    BackLight= cargar_imagen("BackL.png")
+    TestCanv.create_image(940,400, image = BackLight, anchor = NW, tags = ("lights, back"), state = HIDDEN)
+    TestCanv.create_image(1030,400, image = BackLight, anchor = NW, tags = ("lights, back"), state = HIDDEN)
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -201,7 +207,7 @@ def test_drive_window():
             return
         
     def WASD_Press(event):
-        global Pressed, Pot, NotMoving, DirR, DirL, BlinkZ, BlinkC, PressS, PressW, PressF, Front
+        global Pressed, Pot, NotMoving, DirR, DirL, BlinkZ, BlinkC, PressS, PressW, PressF, Front, BackON
         Key = event.char #Estoy asigna la presión de una tecla a la variable Key.
         Pressed = True
         if Key == "w": #Se debe manejar con strings pues es el argumento que maneja "char".
@@ -221,22 +227,21 @@ def test_drive_window():
             else:
                 return
         elif Key == "a":
-            DirL = True
-            if DirR:
-                return
-            else:
+            if not(DirL) and not(DirR):
                 if Pressed:
                     send("dir:-1;")
-            #Se tiene que meter lo de cambiar las imágenes
+                    DirL = True
+                    print("L")
+                    #código para activar la imagen de virar izq.
                 else:
                     return
         elif Key == "d":
-            DirR = True
-            if DirL:
-                return
-            else:
+            if not(DirR) and not(DirL):
                 if Pressed:
                     send("dir:1;")
+                    DirR = True
+                    print("R")
+                    #código para activar la imagen de virar der.
                 else:
                     return
         elif Key == "z":
@@ -258,7 +263,8 @@ def test_drive_window():
             if Pressed and (BlinkC or BlinkZ):
                 BlinkC = False
                 BlinkZ = False
-                TestCanv.itemconfig(("left","right"), state = HIDDEN)
+                TestCanv.itemconfig("left", state = HIDDEN)
+                TestCanv.itemconfig("right", state = HIDDEN)
             else:
                 return
         elif Key == "f": #Front para luces, PressF para la tecla
@@ -291,7 +297,7 @@ def test_drive_window():
             return
     def blink_lights(Direction,Timer):
         if Direction == -1:
-            while Timer < 101 and BlinkZ:
+            while BlinkZ:
                 LedStatus = Timer%2
                 send("ll:" + str(LedStatus) + ";")
                 Timer += 1
@@ -300,35 +306,46 @@ def test_drive_window():
                     TestCanv.itemconfig("left", state = NORMAL)
                 else:
                     TestCanv.itemconfig("left", state = HIDDEN)
-                time.sleep(0.5)
-            send("ll:" + str(LedStatus) + ";")
+                time.sleep(0.8)
+            send("ll:0;")
+            TestCanv.itemconfig("left", state = HIDDEN)
         elif Direction == 1:
-            while Timer < 101 and BlinkC:
+            while BlinkC:
+                LedStatus = Timer%2
                 send("lr:" + str(LedStatus) + ";")
                 Timer += 1
-                time.sleep(0.5)
-                print("Right")
-            send("lr:" + str(LedStatus) + ";")
+                print(LedStatus)
+                if LedStatus == 1:
+                    TestCanv.itemconfig("right", state = NORMAL)
+                else:
+                    TestCanv.itemconfig("right", state = HIDDEN)
+                time.sleep(0.8)
+            send("lr:0;")
+            TestCanv.itemconfig("right", state = HIDDEN)
         else:
             return
     def gradual_accel():
         """
     Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
     """
-        global Pot, NotMoving, Pressed, PressW
+        global Pot, NotMoving, Pressed, PressW, BackON
         NotMoving = False
         PressW = True
         while Pot <= 900 and Pressed:
+            #BackON = False
             Pot += 100
             send("pwm:" + str(Pot) +";")
             time.sleep(0.5)
             TestCanv.itemconfig(Potencia, text = ("PWM:" + str(Pot//10) +"%"))
         send("pwm:" + str(Pot) + ";")
         TestCanv.itemconfig(Potencia, text = ("PWM:" + str(round(Pot//10)) + "%"))
+        #BackON = True
     #---------------------------------------
-
+    def back_light_control():
+        global BackON
+        return
         
-    def gradual_decel():
+    def gradual_decel(): 
         global Pot, NotMoving,PressS
         NotMoving = False
         PressS = True
@@ -373,6 +390,7 @@ def test_drive_window():
             DirR = False
             #Código para detener el parpadeo
             send("dir:0;")
+            print("nodir")
         elif Key == "f":
             PressF = False
     #------------------------------------------------
