@@ -50,7 +50,7 @@ Borde = cargar_imagen("Car1.png")
 TestCanv.create_image(925,200, image = Borde, anchor = NW,tags = ("fondo","día"))
 TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White",tags= "escu")
 TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White",tags = "name")
-TestCanv.create_text(603,657, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm")
+TestCanv.create_text(0,0, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm", anchor= CENTER)
 FrontLight = cargar_imagen("FrontL.png")
 TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
 TestCanv.create_image(1030,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
@@ -249,12 +249,10 @@ def thread_blink(Direction):
     global ZPressed, CPressed, BlinkZ, BlinkC
     if ZPressed and not (CPressed or XPressed):
         BlinkZ = True
-        BlinkC = False
         ThreadBlink = Thread(target = blink_lights, args = [Direction, 0])
         ThreadBlink.start()
     elif CPressed and not (ZPressed or XPressed):
         BlinkC = True
-        BlinkZ = False
         ThreadBlink = Thread(target = blink_lights, args = [Direction, 0])
         ThreadBlink.start()
     else:
