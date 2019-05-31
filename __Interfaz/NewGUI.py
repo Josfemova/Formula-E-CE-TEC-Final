@@ -13,7 +13,7 @@ import time
 #import random
 #Variables globales para el funcionamiento de la ventana
 #global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front, BackON
-global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FLight, Blight, BlinkZ,BlinkC, BlightCount
+global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FLight, Blight, BlinkZ,BlinkC, SentBack
 #Valor inicial de las variables globales para esta ventana
 Speed = 0
 Moving = False
@@ -30,6 +30,7 @@ Blight = True
 BlinkZ = False
 BlinkC = False
 BlightCount = 0
+SentBack = False
 #Valor inicial del auto al entrar a la ventana
 #send("lb:1;")
 def cargar_imagen(Nombre):
@@ -50,7 +51,7 @@ Borde = cargar_imagen("Car1.png")
 TestCanv.create_image(925,200, image = Borde, anchor = NW,tags = ("fondo","día"))
 TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White",tags= "escu")
 TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White",tags = "name")
-TestCanv.create_text(0,0, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm", anchor= CENTER)
+TestCanv.create_text(640,360, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm", anchor= CENTER)
 FrontLight = cargar_imagen("FrontL.png")
 TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
 TestCanv.create_image(1030,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
@@ -58,14 +59,16 @@ DirLight = cargar_imagen("EmL.png")
 TestCanv.create_image(940,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
 TestCanv.create_image(1030,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
 BackLight= cargar_imagen("BackL.png")
-TestCanv.create_image(955,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
-TestCanv.create_image(1005,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+TestCanv.create_image(955,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = NORMAL)
+TestCanv.create_image(1005,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = NORMAL)
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
 #Se utiliza el comando del botón atrás para volver a main
 #Para ello se define una función al igual que en la ventana About
 myCar = NodeMCU()
 myCar.start()
+#send("lb:1;")
+print("Sent backlights to start at 1")
   
 #BtnBack2= Button(TestCanv, text = "Main", command = lambda: btn_back(TestDrive), fg= "cyan", bg= "black")
 #BtnBack2.place(x= 1100, y =600)
@@ -89,17 +92,21 @@ def WASD_Press(event):
     """
     Función que controla los eventos que se activarán al presionar teclas definidas
     """
-    global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, BlightCount, BlinkZ, BlinkC
+    global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, SentBack, BlinkZ, BlinkC
     Key = event.char
     if Key == "w":
         if not WPressed and not SPressed:
             WPressed = True
             ThreadForwards = Thread(target = gradual_front)
             ThreadForwards.start()
-            Blight = False
-            BlightCount = 1
-            ThreadBackL = Thread(target = back_lights)
-            ThreadBackL.start()
+            if SentBack:
+                return
+            elif not SentBack:
+                #send("lb:0;")
+                time.sleep(0.5)
+                SentBack = True
+                print("Sent lights to turn off once.")
+                TestCanv.itemconfig("back",state = HIDDEN)
             #Hilo que controla la aceleración delantera del carro.
         else:
             return #do nothing
@@ -295,33 +302,27 @@ def blink_lights(Direction, Counter):
     else:
         return
     #---------------------------------
-def back_lights():
-    global WPressed, Blight, BlightCount
-    while Blight:
-        if BlightCount == 0:
-            #send("lb:1;")
-            print("backlights On")
-            BlightCount +=1
-        elif BlightCount == 1:
-            #send("lb:0;")
-            print("backlights Off")
-            BlightCount +=1
-        else:
-            return
-            
+
             
 #Función WASD_Release que se activa con los eventos en los que se suelta una de las teclas especificadas:
 def WASD_Release(event):
     """
     Función que controla los eventos que se activarán al soltar teclas definidas
     """
-    global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, Blink, BlightCount
+    global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, Blink, SentBack
     Key = event.char
     print(Key)
     if Key == "w":
         WPressed = False
-        Blight = True
-        BlightCount = 0
+        if SentBack:
+            #send("lb:1;")
+            print("Sent backlights to turn on once")
+            SentBack = False
+            TestCanv.itemconfig("back", state = NORMAL)
+        elif not SentBack:
+            return
+        else:
+            return
     elif Key == "s":
         SPressed = False
     elif Key == "a":
