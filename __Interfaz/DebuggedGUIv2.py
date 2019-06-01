@@ -39,7 +39,7 @@ def cargar_imagen(Nombre):
     Imagen = PhotoImage(file = ruta)
     return Imagen
 #*****************
-TestDrive= Tk()
+TestDrive= Toplevel()
 TestDrive.title("Test Drive")
 TestDrive.geometry("1280x720")
 TestDrive.resizable(width= NO, height= NO)
@@ -103,7 +103,6 @@ def send(Msg):
     if(len(Msg)>0 and Msg[-1] == ";"):
         myCar.send(Msg)
     else:
-        print("heehee")
         return
 
 #--------------------
@@ -126,8 +125,8 @@ def get_log():
 
             mnsRecv = "{1}\n".format(indice,myCar.log[indice][1])
             Answer = mnsRecv #Se almacena la variable de retorno en el comando.
-            print(Answer)
-            print(len(Answer))
+            #print(Answer)
+            #print(len(Answer))
             if len(Answer) >= 15:
                 LDR = Thread(target = dia_noche, args = [Answer])
                 LDR.start()
@@ -195,7 +194,7 @@ def WASD_Press(event):
         if not APressed and not DPressed:
             send("dir:-1;")
             APressed = True
-            print("sent to turn L")
+            #print("sent to turn L")
             #código para activar o desactivar las imágenes que dan feedback de giro en la interfaz de usuario.
             TestCanv.itemconfig("tl", state = NORMAL)
         else:
@@ -204,7 +203,7 @@ def WASD_Press(event):
         if not DPressed and not APressed:
             send("dir:1;")
             DPressed = True
-            print("sent to turn R")
+            #print("sent to turn R")
             TestCanv.itemconfig("tr", state = NORMAL)
         else:
             return
@@ -224,7 +223,7 @@ def WASD_Press(event):
             BlinkC = False
             TestCanv.itemconfig("left", state = HIDDEN)
             TestCanv.itemconfig("right", state = HIDDEN)
-            print("stopped blinking")
+            #print("stopped blinking")
         else:
             return
     elif Key == "c":
@@ -242,12 +241,12 @@ def WASD_Press(event):
             if FLight:
                 send("lf:1;")
                 FLight = False
-                print("sent to turn front on")
+                #print("sent to turn front on")
                 TestCanv.itemconfig("front",state = NORMAL)
             else:
                 send("lf:0;")
                 FLight = True
-                print("sent to turn front off")
+                #print("sent to turn front off")
                 TestCanv.itemconfig("front",state = HIDDEN)
         else:
             return
@@ -266,37 +265,38 @@ def gradual_front():
         if Speed <= -500:
         #En este caso se trabaja con un aumento de velocidad, en un caso esp. en que esta es menor que -500
             send("pwm:" + str(Speed) + ";")
-            print("speed was lower than or at -500 so it was sent before incrementing")
+            #print("speed was lower than or at -500 so it was sent before incrementing")
             Speed += 100
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-            print("incremented speed to " + str(Speed))
+            #print("incremented speed to " + str(Speed))
             time.sleep(1)
         else:
         #en este último caso, la velocidad va a ser mayor que 0, por lo cual se trata normalmente.
             if Speed >= -100:
                 if not SentBackOFF:
                     send("lb:0;")
-                    print("SentBackOFF")
+                    #print("SentBackOFF")
                     SentBackOFF = True
                     SentBackON = False
                     TestCanv.itemconfig("back", state = HIDDEN)
             Speed += 100
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-            print("incremented speed to " + str(Speed))
+            #print("incremented speed to " + str(Speed))
             time.sleep(1)
             
     TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) + "%")
-    print("incremented speed to " + str(Speed) + " and exited first while")
+    #print("incremented speed to " + str(Speed) + " and exited first while")
     time.sleep(1)
     #la función entra a este while cuando salga del primero, que es mayor a 500.
     while 900>= Speed >= 400 and WPressed and not SPressed:
         Speed += 100
         send("pwm:" + str(Speed) + ";")
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-        print("sent to move forward by " + str(Speed))
+        #print("sent to move forward by " + str(Speed))
         time.sleep(1)
-    send("pwm:" + str(Speed) + ";")
-    print("sent to move forward by " + str(Speed) + " and exited second while")
+    #send("pwm:" + str(Speed) + ";")
+    #print("sent to move forward by " + str(Speed) + " and exited second while")
+    TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
     time.sleep(1)
     #---------------------------------------------
 def gradual_back():
@@ -308,29 +308,29 @@ def gradual_back():
     while Speed > -400 and SPressed and not WPressed:
         if Speed >= 500:
             send("pwm:" + str(Speed) + ";")
-            print("Speed was higher than or at 500, so it was sent before decrementing")
+            #print("Speed was higher than or at 500, so it was sent before decrementing")
             Speed -= 100
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-            print("decremented speed to " + str(Speed))
+            #print("decremented speed to " + str(Speed))
             time.sleep(1)
         else:
             Speed -= 100
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-            print("decremented speed to " + str(Speed))
+            #print("decremented speed to " + str(Speed))
             time.sleep(1)
     TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-    print("decremented speed to " + str(Speed) + " and exited first while")
+    #print("decremented speed to " + str(Speed) + " and exited first while")
     time.sleep(1)
     #la función entra a este while cuando salga del primero, que es menor a 500.
     while -900<=Speed<=-400 and SPressed and not WPressed:
         Speed -= 100
         send("pwm:" + str(Speed) + ";")
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-        print("sent to move backwards by " + str(Speed))
+        #print("sent to move backwards by " + str(Speed))
         time.sleep(1)
-    send("pwm:" + str(Speed) + ";")
+    #send("pwm:" + str(Speed) + ";")
     TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-    print("sent to move backwards by " + str(Speed) + " and exited second while")
+    #print("sent to move backwards by " + str(Speed) + " and exited second while")
     #-------------------------------------------
 def thread_blink(Direction):
     """
@@ -356,32 +356,32 @@ def blink_lights(Direction, Counter):
             send("ll:" + str(LED) + ";")
             if LED == 1:
                 TestCanv.itemconfig("left", state = NORMAL)
-                print("Left light is ON")
+                #print("Left light is ON")
                 Counter += 1
             else:
                 TestCanv.itemconfig("left", state = HIDDEN)
-                print("Left light is OFF")
+                #print("Left light is OFF")
                 Counter += 1
             time.sleep(1)
         send("ll:0;")
         TestCanv.itemconfig("left", state = HIDDEN)
-        print("Left light is OFF and exited while")
+        #print("Left light is OFF and exited while")
     elif Direction == "R":
         while BlinkC:
             LED = Counter%2
             send("lr:" + str(LED) + ";")
             if LED == 1:
                 TestCanv.itemconfig("right", state = NORMAL)
-                print("Right light is ON")
+                #print("Right light is ON")
                 Counter += 1
             else:
                 TestCanv.itemconfig("right", state = HIDDEN)
-                print("Right light is OFF")
+                #print("Right light is OFF")
                 Counter += 1
             time.sleep(1)
         send("lr:0;")
         TestCanv.itemconfig("right", state = HIDDEN)
-        print("Right light is OFF and exited while")
+        #print("Right light is OFF and exited while")
     else:
         return
     #---------------------------------
@@ -393,11 +393,11 @@ def back_light_control_press():
             return
         else:
             send("lb:1;")
-            print("SentBackON")
+            #print("SentBackON")
             TestCanv.itemconfig("back",state = NORMAL)
             SentBackON = True
             SentBackOFF = False
-    print("S released, exit press while")
+    #print("S released, exit press while")
 #-----------------------------------------                
 #Función WASD_Release que se activa con los eventos en los que se suelta una de las teclas especificadas:
 def WASD_Release(event):
@@ -432,14 +432,14 @@ def WASD_Release(event):
 
 def back_light_control_release():
     global SPressed, SentBackON, SentBackOFF, Speed, WPressed
-    print(SPressed)
+    #print(SPressed)
     while not SPressed:
         while Speed >= 0:
             if SentBackOFF:
                 return
             else:
                 send("lb:0;")
-                print("SentBackOFF")
+                #print("SentBackOFF")
                 TestCanv.itemconfig("back", state = HIDDEN)
                 SentBackOFF = True
                 SentBackON = False
@@ -448,11 +448,11 @@ def back_light_control_release():
                 return
             else:
                 send("lb:1;")
-                print("SentBackON")
+                #print("SentBackON")
                 TestCanv.itemconfig("back", state = NORMAL)
                 SentBackON = True
                 SentBackOFF = False
-    print("S was pressed and exit release while")
+    #print("S was pressed and exit release while")
 
 
 TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
