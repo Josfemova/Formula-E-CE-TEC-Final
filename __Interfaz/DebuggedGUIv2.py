@@ -34,10 +34,7 @@ SentBackON = False
 SentBackOFF = False
 #Valor inicial del auto al entrar a la ventana
 #send("lb:1;")
-def cargar_imagen(Nombre):
-    ruta = os.path.join("imagenes",Nombre)
-    Imagen = PhotoImage(file = ruta)
-    return Imagen
+
 #*****************
 TestDrive= Toplevel()
 TestDrive.title("Test Drive")
