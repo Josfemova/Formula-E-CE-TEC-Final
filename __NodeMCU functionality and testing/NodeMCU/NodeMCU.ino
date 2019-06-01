@@ -504,19 +504,21 @@ String getSense(){
    * Gracias a estos dos puntos, se modela la función y podemos definir un rango.
    * La mayor lectura, 3.2V corresponde al 100%, la mlectura al estar las baterias en 1.4 es 2.7 (técnicamente descargadas)
    */
-  int batteryLvl = round(((analogRead(A0) -682)/3.4));
+  //int batteryLvl = round(((analogRead(A0) -682)/3.4));
+  int Charge = analogRead(A0);
+  int batteryLvl = map(Charge,0,1023,0,100);
   
   //definimos light como una función que retornará un string más arriba, pero por motivos de mantener el código más cercano a lo esperado, se cambió.
   
   //declaramos la variable light como dependiente del valor que recibe el pin D8 según la corriente que pasa por el LDR
   int light = digitalRead(ldr);
   Serial.println(light);
-  String lightText = "";
-  if (light == 0 ){ lightText="Poca luz"; }else{ lightText="Sitio iluminado"; }
+  //String lightText = "";
+  //if (light == 0 ){ lightText="Poca luz"; }else{ lightText="Sitio iluminado"; }
   
-  /*char sense [16];
-  sprintf(sense, "blvl:%d;ldr:%d;", batteryLvl, light);*/
-  String sense = "blvl:"+ String(batteryLvl) + " ldr:"+ String(light) + " - " + String(lightText); 
+  char sense [16];
+  sprintf(sense, "blvl:%d;ldr:%d;", batteryLvl, light);
+  //String sense = "blvl:"+ String(batteryLvl) + " ldr:"+ String(light) + " - " + String(lightText); 
   Serial.print("Sensing: ");
   Serial.println(sense);
   return sense;
