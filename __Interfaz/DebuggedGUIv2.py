@@ -47,8 +47,10 @@ TestDrive.resizable(width= NO, height= NO)
 TestCanv= Canvas(TestDrive, width= 1280, height= 720,bg="black")
 TestCanv.place(x=0, y=0)
 
-FondoTest = cargar_imagen("POV.png")
-TestCanv.create_image(0,0,image=FondoTest, anchor = NW,tags = "background")
+FondoDia = cargar_imagen("DAY.png")
+TestCanv.create_image(0,0,image=FondoDia, anchor = NW,tags = "dia", state = NORMAL)
+FondoNoche = cargar_imagen("NIGHT.png")
+TestCanv.create_image(0,0,image= FondoNoche, anchor = NW, tags = "noche", state = HIDDEN)
 
 TopWheelL = cargar_imagen("TLWheel.png")
 TestCanv.create_image(960,240, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
@@ -64,6 +66,7 @@ TestCanv.create_image(925,200, image = Borde, anchor = NW,tags = ("fondo","día"
 TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White",tags= "escu")
 TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White",tags = "name")
 TestCanv.create_text(640,360, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm", anchor= CENTER)
+TestCanv.create_text(1100,500, text = "Charge: %", font = ("Consolas", 18), fill = "white", tags = "battext", anchor = NW)
 
 FrontLight = cargar_imagen("FrontL.png")
 TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
@@ -100,15 +103,68 @@ def send(Msg):
     if(len(Msg)>0 and Msg[-1] == ";"):
         myCar.send(Msg)
     else:
+        print("heehee")
         return
 
 #--------------------
-"""def check_sense():
-    send("sense;")
-    check.get_log()
-    time.sleep(2)
-    return check_sense() """
+def check_sense():
+    while True:
+        Command = myCar.send("sense;")
+        time.sleep(9);
+    
+ThreadSense = Thread(target = check_sense)
+ThreadSense.start()
 
+def get_log():
+    """
+    Hilo que actualiza los Text cada vez que se agrega un nuevo mensaje al log de myCar
+    """
+    indice = 0
+    while(myCar.loop):
+        while(indice < len(myCar.log)):
+            mnsSend = "[{0}] cmd: {1}\n".format(indice,myCar.log[indice][0])
+
+            mnsRecv = "{1}\n".format(indice,myCar.log[indice][1])
+            Answer = mnsRecv #Se almacena la variable de retorno en el comando.
+            print(Answer)
+            print(len(Answer))
+            if len(Answer) >= 15:
+                LDR = Thread(target = dia_noche, args = [Answer])
+                LDR.start()
+                Bat = Thread(target = bateria, args = [Answer])
+                Bat.start()
+            indice+=1
+        time.sleep(0.200)
+
+def dia_noche(Answer):
+    #Validar la posición del caracter en el que la LDR manda la variable light
+    if Answer[-4] == "0":
+        TestCanv.itemconfig("dia", state = HIDDEN)
+        TestCanv.itemconfig("noche", state = NORMAL)
+    elif Answer[-4] == "1":
+        TestCanv.itemconfig("dia", state = NORMAL)
+        TestCanv.itemconfig("noche", state = HIDDEN)
+    else:
+        return
+
+def bateria(Answer):
+    #print("entered")
+    global Battery
+    if len(Answer) == 15:
+        Battery = Answer[5]
+        TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
+    elif len(Answer) == 16:
+        Battery = Answer[5:7]
+        TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
+    elif len(Answer) == 17:
+        Battery = Answer[5:8]
+        TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
+    else:
+        return
+
+
+p = Thread(target=get_log)
+p.start()
 #------------------
 def WASD_Press(event):
     """
