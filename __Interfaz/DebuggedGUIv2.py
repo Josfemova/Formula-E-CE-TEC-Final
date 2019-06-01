@@ -46,22 +46,37 @@ TestDrive.resizable(width= NO, height= NO)
 #Se genera el canvas de la ventana de pruebas
 TestCanv= Canvas(TestDrive, width= 1280, height= 720,bg="black")
 TestCanv.place(x=0, y=0)
+
 FondoTest = cargar_imagen("POV.png")
 TestCanv.create_image(0,0,image=FondoTest, anchor = NW,tags = "background")
+
+TopWheelL = cargar_imagen("TLWheel.png")
+TestCanv.create_image(960,240, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
+TestCanv.create_image(1032,242, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
+
+TopWheelR = cargar_imagen("TopWheelRight.png")
+TestCanv.create_image(963,240, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
+TestCanv.create_image(1040,238, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
+
 Borde = cargar_imagen("Car1.png")
 TestCanv.create_image(925,200, image = Borde, anchor = NW,tags = ("fondo","día"))
+
 TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White",tags= "escu")
 TestCanv.create_text(600,15, text = "NombreCarro", font = ("Consolas",15),fill = "White",tags = "name")
 TestCanv.create_text(640,360, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm", anchor= CENTER)
+
 FrontLight = cargar_imagen("FrontL.png")
 TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
 TestCanv.create_image(1030,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
+
 DirLight = cargar_imagen("EmL.png")
 TestCanv.create_image(940,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
 TestCanv.create_image(1030,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
+
 BackLight= cargar_imagen("BackL.png")
 TestCanv.create_image(955,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
 TestCanv.create_image(1005,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
 #Se utiliza el comando del botón atrás para volver a main
@@ -126,6 +141,7 @@ def WASD_Press(event):
             APressed = True
             print("sent to turn L")
             #código para activar o desactivar las imágenes que dan feedback de giro en la interfaz de usuario.
+            TestCanv.itemconfig("tl", state = NORMAL)
         else:
             return
     elif Key == "d":
@@ -133,6 +149,7 @@ def WASD_Press(event):
             #send("dir:1;")
             DPressed = True
             print("sent to turn R")
+            TestCanv.itemconfig("tr", state = NORMAL)
         else:
             return
     elif Key == "z":
@@ -374,8 +391,10 @@ def WASD_Release(event):
         ThreadBacklightsR.start()
     elif Key == "a":
         APressed = False
+        TestCanv.itemconfig("tl", state = HIDDEN)
     elif Key == "d":
         DPressed = False
+        TestCanv.itemconfig("tr", state = HIDDEN)
     elif Key == "z":
         ZPressed = False
     elif Key == "x":
