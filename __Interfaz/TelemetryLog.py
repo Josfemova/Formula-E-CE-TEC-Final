@@ -71,16 +71,35 @@ def get_log():
     while(myCar.loop):
         while(indice < len(myCar.log)):
             mnsSend = "[{0}] cmd: {1}\n".format(indice,myCar.log[indice][0])
-            SentCarScrolledTxt.insert(END,mnsSend)
-            SentCarScrolledTxt.see("end")
+            #SentCarScrolledTxt.insert(END,mnsSend)
+            #SentCarScrolledTxt.see("end")
 
             mnsRecv = "[{0}] result: {1}\n".format(indice,myCar.log[indice][1])
-            RevCarScrolledTxt.insert(END, mnsRecv)
-            RevCarScrolledTxt.see('end')
-
+            #RevCarScrolledTxt.insert(END, mnsRecv)
+            #RevCarScrolledTxt.see('end')
+            Answer = mnsRecv #Se almacena la variable de retorno en el comando.
+            if len(Answer) >= 27:
+                dia_noche(Answer) #para estar chequeando el estado de la respuesta de la LDR.
+                #bateria(Answer) #para revisar el estado de la batería del carro.
             indice+=1
         time.sleep(0.200)
+
+def dia_noche(Answer):
+    #Validar la posición del caracter en el que la LDR manda la variable light
+    #if Answer[-4] == "0":
+      #  TestCanv.itemconfig("dia", state = HIDDEN)
+     #   TestCanv.itemconfig("noche", state = NORMAL)
+    #elif Answer[-4] == "1":
+     #TestCanv.itemconfig("dia", state = NORMAL)
+     #TestCanv.itemconfig("noche", state = HIDDEN)
+     else:
+         return
+
+def bateria():
     
+    return
+
+
 p = Thread(target=get_log)
 p.start()
            

@@ -13,7 +13,7 @@ import time
 #import random
 #Variables globales para el funcionamiento de la ventana
 #global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front, BackON
-global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FLight, Blight, BlinkZ,BlinkC, SentBack
+global Speed, Moving, WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FLight, Blight, BlinkZ,BlinkC, SentBackON
 #Valor inicial de las variables globales para esta ventana
 Speed = 0
 Moving = False
@@ -30,7 +30,8 @@ Blight = True
 BlinkZ = False
 BlinkC = False
 BlightCount = 0
-SentBack = False
+SentBackON = False
+SentBackOFF = False
 #Valor inicial del auto al entrar a la ventana
 #send("lb:1;")
 def cargar_imagen(Nombre):
@@ -59,16 +60,14 @@ DirLight = cargar_imagen("EmL.png")
 TestCanv.create_image(940,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
 TestCanv.create_image(1030,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
 BackLight= cargar_imagen("BackL.png")
-TestCanv.create_image(955,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = NORMAL)
-TestCanv.create_image(1005,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = NORMAL)
+TestCanv.create_image(955,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+TestCanv.create_image(1005,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
     #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
 #Se utiliza el comando del botón atrás para volver a main
 #Para ello se define una función al igual que en la ventana About
 myCar = NodeMCU()
 myCar.start()
-#send("lb:1;")
-print("Sent backlights to start at 1")
   
 #BtnBack2= Button(TestCanv, text = "Main", command = lambda: btn_back(TestDrive), fg= "cyan", bg= "black")
 #BtnBack2.place(x= 1100, y =600)
@@ -87,12 +86,14 @@ def send(Msg):
         myCar.send(Msg)
     else:
         return
+
 #--------------------
 def check_sense():
     send("sense;")
     check.get_log()
     time.sleep(2)
     return check_sense()
+
 #------------------
 def WASD_Press(event):
     """
@@ -106,14 +107,6 @@ def WASD_Press(event):
             ThreadForwards = Thread(target = gradual_front)
             time.sleep(0.2)
             ThreadForwards.start()
-            if SentBack:
-                return
-            elif not SentBack:
-                time.sleep(0.5)
-                #send("lb:0;")
-                SentBack = True
-                print("Sent lights to turn off once.")
-                TestCanv.itemconfig("back",state = HIDDEN)
             #Hilo que controla la aceleración delantera del carro.
         else:
             return #do nothing
@@ -122,6 +115,9 @@ def WASD_Press(event):
             SPressed = True
             ThreadBackwards = Thread(target = gradual_back)
             ThreadBackwards.start()
+            time.sleep(0.3)
+            ThreadBacklightsP = Thread(target = back_light_control_press)
+            ThreadBacklightsP.start()
         else:
             return
     elif Key == "a":
@@ -190,7 +186,7 @@ def gradual_front():
     """
     Función que es invocada por el hilo de aceleración para generar un avance gradual
     """
-    global Speed, Moving, WPressed, SPressed
+    global Speed, Moving, WPressed, SPressed, SentBackOFF,SentBackON
     WPressed = True
     Moving = True
     while Speed < 400 and WPressed and not SPressed:
@@ -204,6 +200,13 @@ def gradual_front():
             time.sleep(1)
         else:
         #en este último caso, la velocidad va a ser mayor que 0, por lo cual se trata normalmente.
+            if Speed >= -100:
+                if not SentBackOFF:
+                    #send("lb:0;")
+                    print("SentBackOFF")
+                    SentBackOFF = True
+                    SentBackON = False
+                    TestCanv.itemconfig("back", state = HIDDEN)
             Speed += 100
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
             print("incremented speed to " + str(Speed))
@@ -309,8 +312,52 @@ def blink_lights(Direction, Counter):
     else:
         return
     #---------------------------------
-
-            
+    """
+def back_light_control():
+    global Speed, SentBackON, SPressed, SentBackOFF
+    if SPressed and SentBackON:
+        return
+    elif SPressed and not SentBackON:
+        #send("lb:1;")
+        TestCanv.itemconfig("back", state = NORMAL)
+        print("SentBackON")
+        SentBackON = True
+        SentBackOFF = False
+        time.sleep(0.6)
+    elif not SPressed and Speed >= 0:
+        if SentBackOFF:
+            return
+        else:
+            #send("lb:0;")
+            TestCanv.itemconfig("back", state = HIDDEN)
+            print("SentBackOFF")
+            SentBackOFF = True
+            SentBackON = False
+    elif not SPressed and Speed < 0:
+        if SentBackON:
+            return
+        else:
+            #send("lb:1;")
+            TestCanv.itemconfig("back", state = NORMAL)
+            print("SentBackON")
+            SentBackON = True
+            SentBackOFF = False
+    else:
+        return
+"""
+def back_light_control_press():
+    global Speed, SentBackON, SentBackOFF, SPressed
+    while SPressed:
+        if SentBackON:
+            return
+        else:
+            #send("lb:1;")
+            print("SentBackON")
+            TestCanv.itemconfig("back",state = NORMAL)
+            SentBackON = True
+            SentBackOFF = False
+    print("S released, exit press while")
+                
 #Función WASD_Release que se activa con los eventos en los que se suelta una de las teclas especificadas:
 def WASD_Release(event):
     """
@@ -321,17 +368,10 @@ def WASD_Release(event):
     #print(Key)
     if Key == "w":
         WPressed = False
-        if SentBack:
-            #send("lb:1;")
-            print("Sent backlights to turn on once")
-            SentBack = False
-            TestCanv.itemconfig("back", state = NORMAL)
-        elif not SentBack:
-            return
-        else:
-            return
     elif Key == "s":
         SPressed = False
+        ThreadBacklightsR = Thread(target = back_light_control_release)
+        ThreadBacklightsR.start()
     elif Key == "a":
         APressed = False
     elif Key == "d":
@@ -344,11 +384,43 @@ def WASD_Release(event):
         CPressed = False
     elif Key == "f":
         FPressed = False
-            
-            
-                
-            
-            
+
+def back_light_control_release():
+    global SPressed, SentBackON, SentBackOFF, Speed, WPressed
+    print(SPressed)
+    while not SPressed:
+        while Speed >= 0:
+            if SentBackOFF:
+                return
+            else:
+                #send("lb:0;")
+                print("SentBackOFF")
+                TestCanv.itemconfig("back", state = HIDDEN)
+                SentBackOFF = True
+                SentBackON = False
+        else:
+            if SentBackON:
+                return
+            else:
+                #send("lb:1;")
+                print("SentBackON")
+                TestCanv.itemconfig("back", state = NORMAL)
+                SentBackON = True
+                SentBackOFF = False
+    print("S was pressed and exit release while")
+    """while not SPressed and WPressed:
+        while Speed < 0:
+            return
+        if SentBackOFF:
+            return
+        else:
+            #send("lb:0;")
+                print("SentBackOFF")
+                TestCanv.itemconfig("back", state = HIDDEN)
+                SentBackOFF = True
+                SentBackON = False"""
+
+
 TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
 TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
     
