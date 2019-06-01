@@ -143,7 +143,7 @@ def about_window():
 #-----Se termina la venta about y se define la ventana de pruebas
 def test_drive_window():
     #Variables globales para el funcionamiento de la ventana
-    global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front
+    global Pot, NotMoving,Pressed,DirR,DirL, BlinkC, BlinkZ, PressW, PressS, PressF, Front, lbr
     Pot = 0
     NotMoving = True
     Pressed = False
@@ -155,6 +155,7 @@ def test_drive_window():
     PressS = False
     PressF = False
     Front = True
+    lbr = True
     TestDrive= Toplevel()
     TestDrive.title("Test Drive")
     TestDrive.geometry("1280x720")
@@ -193,7 +194,7 @@ def test_drive_window():
             myCar.send(Msg)
         else:
             return
-        
+    send("lb:1;")    
     def WASD_Press(event):
         global Pressed, Pot, NotMoving, DirR, DirL, BlinkZ, BlinkC, PressS, PressW, PressF, Front
         Key = event.char #Estoy asigna la presión de una tecla a la variable Key.
@@ -304,9 +305,13 @@ def test_drive_window():
         """
     Función gradual_accel que es invocada por el Thread con el objetivo de generar una aceleración gradual
     """
-        global Pot, NotMoving, Pressed, PressW
+        global Pot, NotMoving, Pressed, PressW,lbr
         NotMoving = False
         PressW = True
+        if lbr:
+            lbr = False
+            send("lb:0;")
+            
         while Pot <= 900 and Pressed:
             Pot += 100
             send("pwm:" + str(Pot) +";")
@@ -371,7 +376,11 @@ def test_drive_window():
         """
         Función para detener el auto cuando se sueltan las teclas de movimientos acc/reversa
         """
-        global Pot, NotMoving, Pressed
+        global Pot, NotMoving, Pressed, lbr
+        if not lbr:
+            lbr = True
+            send("lb:1;")
+            
         if Pot > 0:
             while Pot > 0 and not(Pressed):
                 Pot -= 100

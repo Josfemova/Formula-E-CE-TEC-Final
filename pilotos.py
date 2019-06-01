@@ -15,6 +15,7 @@ class main_Pilotos:
     iREP = 9
     iRGP = 10
     txtfile = "__InfoEscuderías\\EscuderiaInfo.txt"
+    CURRENTORDER = "REP"
     
 
     def __init__(self):
@@ -44,6 +45,7 @@ class main_Pilotos:
             self.pilotoInfo.append(fila)
         txtEscud.close()
         self.calcIGE()
+        
 
     def addRGP_REP(self,fila):
         podio = fila[self.iPODIO]
@@ -83,13 +85,13 @@ class main_Pilotos:
     def agregarPiloto(self,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
         nuevoDatos = [nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
         self.pilotoInfo.append(nuevoDatos)
-        self.actualizarArchivo()
+        self.ordenar(self.CURRENTORDER)
             
     def modificarPiloto(self, pos, nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
         modDatos = [nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
         self.pilotoInfo.pop(pos)
         self.pilotoInfo.append(modDatos)
-        self.actualizarArchivo()
+        self.ordenar(self.CURRENTORDER)
 
     def actualizarArchivo(self):
         txtEscud = open(self.txtfile,"w")
@@ -106,11 +108,15 @@ class main_Pilotos:
 
         txtEscud.write(datos)
         txtEscud.close()
+        
         self.refrescar()
+        
         
     def ordenar(self, param):
         if type(param) is str:
             if param== "RGP" or param == "REP":
+                self.CURRENTORDER = param
+                self.actualizarArchivo()
                 self.pilotoInfo = self.ordenar_aux("", param)
                 self.actualizarArchivo()
             else:
