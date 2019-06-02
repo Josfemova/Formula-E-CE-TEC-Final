@@ -2,7 +2,7 @@
 #movimiento especial = "dir=1.pwm=1023.dir=-1.pwm=-900.zigzag"
 
 class main_Autos:
-    #constantes de posicion de datos en la lista autoInfo
+    #constantes de posicion de datos en la lista info
     iMARCA =0
     iMODELO =1
     iPAIS=2
@@ -20,7 +20,7 @@ class main_Autos:
     
 
     def __init__(self):
-        self.autoInfo =[]
+        self.info =[]
         self.refrescar()
         
  
@@ -28,28 +28,29 @@ class main_Autos:
     def refrescar(self):
         txtAuto = open(self.txtfile,"r+")
         filas = txtAuto.readlines()
-        self.autoInfo = []
+        self.info = []
         for x in filas:
             fila = x.split(";")
             fila[-1] = fila[-1].replace("\n","")
             fila[-1] = float(fila[-1])
-            self.autoInfo.append(fila)
+            fila[self.iTEMPO] = int(fila[self.iTEMPO])
+            self.info.append(fila)
         txtAuto.close()
 
     def agregarAuto(self,marca, mod , pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef):
         nuevoDatos = [marca, mod, pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef]
-        self.autoInfo.append(nuevoDatos)
+        self.info.append(nuevoDatos)
         self.actualizarArchivo()
             
     def modificarAuto(self, pos, marca, mod , pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef):
         modDatos = [marca, mod , pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef]
-        self.autoInfo.pop(pos)
-        self.autoInfo.append(modDatos)
+        self.info.pop(pos)
+        self.info.append(modDatos)
         self.actualizarArchivo()
 
     def actualizarArchivo(self):
         txtAuto = open(self.txtfile,"w")
-        src = self.autoInfo
+        src = self.info
         datos = ""
         for piloto in src:
             line = ""
@@ -65,14 +66,14 @@ class main_Autos:
         self.refrescar()
         
     def ordenar(self):
-        self.autoInfo = self.ordenar_aux("")
+        self.info = self.ordenar_aux("")
         self.actualizarArchivo()
 
     def ordenar_aux(self, matriz = ""):
         param = self.iEFICIENCIA
         
         if matriz == "":
-            matriz = self.autoInfo
+            matriz = self.info
         elif matriz == []:
             return []
 

@@ -2,7 +2,7 @@
 #movimiento especial = "dir=1.pwm=1023.dir=-1.pwm=-900.zigzag"
 
 class main_Pilotos:
-    #constantes de posicion de datos en la lista pilotoInfo
+    #constantes de posicion de datos en la lista info
     iNOM =0
     iEDAD =1
     iPAIS=2
@@ -19,7 +19,7 @@ class main_Pilotos:
     
 
     def __init__(self):
-        self.pilotoInfo =[]
+        self.info =[]
         self.IGE = 0
         
         self.refrescar()
@@ -29,7 +29,7 @@ class main_Pilotos:
     def refrescar(self):
         txtEscud = open(self.txtfile,"r+")
         filas = txtEscud.readlines()
-        self.pilotoInfo = []
+        self.info = []
         for x in filas:
             fila = x.split(";")
             fila[-1] = fila[-1].replace("\n","")
@@ -42,7 +42,7 @@ class main_Pilotos:
                 fila[self.iRGP] = float(fila[self.iRGP])
                 
             fila = self.addRGP_REP(fila)
-            self.pilotoInfo.append(fila)
+            self.info.append(fila)
         txtEscud.close()
         self.calcIGE()
         
@@ -77,25 +77,25 @@ class main_Pilotos:
     def calcIGE(self):
         participaciones = 0
         victorias = 0
-        for piloto in self.pilotoInfo:
+        for piloto in self.info:
             victorias+= piloto[self.iVICTO]
             participaciones += piloto[self.iPARTICIPA]
         self.IGE = victorias/participaciones
 
     def agregarPiloto(self,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
         nuevoDatos = [nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
-        self.pilotoInfo.append(nuevoDatos)
+        self.info.append(nuevoDatos)
         self.ordenar(self.CURRENTORDER)
             
     def modificarPiloto(self, pos, nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
         modDatos = [nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
-        self.pilotoInfo.pop(pos)
-        self.pilotoInfo.append(modDatos)
+        self.info.pop(pos)
+        self.info.append(modDatos)
         self.ordenar(self.CURRENTORDER)
 
     def actualizarArchivo(self):
         txtEscud = open(self.txtfile,"w")
-        src = self.pilotoInfo
+        src = self.info
         datos = ""
         for piloto in src:
             line = ""
@@ -117,7 +117,7 @@ class main_Pilotos:
             if param== "RGP" or param == "REP":
                 self.CURRENTORDER = param
                 self.actualizarArchivo()
-                self.pilotoInfo = self.ordenar_aux("", param)
+                self.info = self.ordenar_aux("", param)
                 self.actualizarArchivo()
             else:
                 return "parametro no valido"
@@ -133,7 +133,7 @@ class main_Pilotos:
             return "Error, parametro invalido"
         
         if matriz == "":
-            matriz = self.pilotoInfo
+            matriz = self.info
         elif matriz == []:
             return []
 
@@ -157,7 +157,7 @@ class main_Pilotos:
         return ret
 
     def getCelebracion(self, posPiloto):
-        comandos = self.pilotoInfo[posPiloto][self.iMOV]
+        comandos = self.info[posPiloto][self.iMOV]
         comandos = comandos.split(".")
         for cmd in range(0, len(comandos)):
             comandos[cmd] = comandos[cmd].replace("=",":") + ";"
