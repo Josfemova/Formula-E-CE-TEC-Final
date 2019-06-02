@@ -283,7 +283,7 @@ String implementar(String llave, String valor){
       //se envía un 0 a los pines del motor de dirección, porque deben regresar a su posicion original
       digitalWrite(In3,0);
       digitalWrite(In4,0);
-      result="Motor frenado;";
+      result="halt;";
     }
     else if (valorEntero>0 && valorEntero<=1023){
       analogWrite(EnA,valorEntero);
@@ -299,7 +299,7 @@ String implementar(String llave, String valor){
     }
     else{
       //Se le avisa al usuario que el valor ingresado fue incorrecto
-      return "valor invalido. pwm debe ser menor o igual a 1023";
+      return "invalid pwm";
     }
   }
  
@@ -313,7 +313,7 @@ String implementar(String llave, String valor){
         //también va un digitalWrite con los valores respectivos de In3 e In4 que lo hacen girar a la derecha
         digitalWrite(In3,0); //acá se repite el problema de la llave "pwm", en la que Santi dio una instrucción pero el comportamiento esperado no fue el dado, por lo que se invirtió.
         digitalWrite(In4,1);
-        result="Girando derecha;";
+        result="trn right;";
         
         break;
       case -1:
@@ -322,7 +322,7 @@ String implementar(String llave, String valor){
         analogWrite(EnB,1023);
         digitalWrite(In3,1);
         digitalWrite(In4,0);
-        result="Girando izquierda;";
+        result="trn left;";
 
         break;
         //default lo que hace es decirle al código cuál debería ser el valor en el que se da un else
@@ -334,7 +334,7 @@ String implementar(String llave, String valor){
         digitalWrite(In4,0);
         delay(100);
         analogWrite(EnB,0);
-        result="Curso directo";
+        result="strght";
         break;
     }
   }
@@ -350,12 +350,12 @@ String implementar(String llave, String valor){
         if (valor == "1"){
           data = data & 0b11110011;
           Serial.println(data);
-          result="Luces frontales encendidas;";
+          result="lfon;";
         }
         else if (valor == "0"){
           data = data | 0b00001100;
           Serial.println(data);
-          result = "Luces frontales apagadas;";
+          result = "lfoff;";
         }
         //# AGREGAR CÓDIGO PARA ENCENDER LUCES FRONTALES
         break;
@@ -365,12 +365,12 @@ String implementar(String llave, String valor){
         if (valor == "1"){
           data = data & 0b11001111;
           Serial.println(data);
-          result="Luces traseras encendidas;";
+          result="lbon;";
         }
         else if (valor == "0"){
           data = data | 0b00110000;
           Serial.println(data);
-          result = "Luces traseras apagadas;";
+          result = "lboff;";
         }
         break;
       case 'l':
@@ -379,12 +379,12 @@ String implementar(String llave, String valor){
         if (valor == "1"){
           data = data & 0b01111111;
           Serial.println(data);
-          result = "Direccional izquierda encendida;";
+          result = "llon;";
         }
         else if (valor == "0"){
           data = data | 0b10000000;
           Serial.println(data);
-          result = "Direccional izquierda apagada;";
+          result = "lloff;";
         }
         break;
       case 'r':
@@ -393,12 +393,12 @@ String implementar(String llave, String valor){
         if (valor == "1"){
           data = data & 0b10111111;
           Serial.println(data);
-          result = "Direccional derecha encendida;";
+          result = "lron;";
         }
         else if (valor == "0"){
           data = data | 0b01000000;
           Serial.println(data);
-          result = "Direccional derecha apagada;";
+          result = "lroff;";
         }
         break;
       /**
@@ -407,7 +407,7 @@ String implementar(String llave, String valor){
        */
       default:
         Serial.println("Ninguna de las anteriores");
-        result = "no hay cambios;";
+        result = "Ok;";
         break;
     }
     //data VARIABLE QUE DEFINE CUALES LUCES SE ENCIENDEN Y CUALES SE APAGAN
@@ -429,7 +429,7 @@ String implementar(String llave, String valor){
         frenar();
         //detenemos el motor número 2.
         directo();
-        result = "Circulo a la derecha;";
+        result = "Circle R;";
         break;
         }
       case -1:
@@ -442,7 +442,7 @@ String implementar(String llave, String valor){
         frenar();
         //detenemos el motor número 2.
         directo();
-        result = "Circulo a la izquierda;";
+        result = "Circle L;";
         break;
     }
     default:
@@ -455,7 +455,7 @@ String implementar(String llave, String valor){
           delay(tiempo);
           frenar();
           directo();
-          result = "se dio vuelta por " +String(tiempo) + " milisegundos";
+          result = "turn" +String(tiempo) + " ms";
           break;
     }
     }
@@ -504,22 +504,24 @@ String getSense(){
    * Gracias a estos dos puntos, se modela la función y podemos definir un rango.
    * La mayor lectura, 3.2V corresponde al 100%, la mlectura al estar las baterias en 1.4 es 2.7 (técnicamente descargadas)
    */
-  int batteryLvl = round(((analogRead(A0) -682)/3.4));
+  //int batteryLvl = round(((analogRead(A0) -682)/3.4));
+  int Charge = analogRead(A0);
+  int batteryLvl = map(Charge,0,1023,0,100);
   
   //definimos light como una función que retornará un string más arriba, pero por motivos de mantener el código más cercano a lo esperado, se cambió.
   
   //declaramos la variable light como dependiente del valor que recibe el pin D8 según la corriente que pasa por el LDR
   int light = digitalRead(ldr);
   Serial.println(light);
-  String lightText = "";
-  if (light == 0 ){ lightText="Poca luz"; }else{ lightText="Sitio iluminado"; }
+  //String lightText = "";
+  //if (light == 0 ){ lightText="Poca luz"; }else{ lightText="Sitio iluminado"; }
   
-  /*char sense [16];
-  sprintf(sense, "blvl:%d;ldr:%d;", batteryLvl, light);*/
-  String sense = "blvl:"+ String(batteryLvl) + " ldr:"+ String(light) + " - " + String(lightText); 
+  char sense [16];
+  sprintf(sense, "blvl:%d;ldr:%d;", batteryLvl, light);
+  //String sense = "blvl:"+ String(batteryLvl) + " ldr:"+ String(light) + " - " + String(lightText); 
   Serial.print("Sensing: ");
   Serial.println(sense);
-  return sense;
+  return (sense);
 }
 String ZigZag(){
   //Acá el comportamiento es un poco distinto, haremos que el auto recorra una línea recta por un corto periodo, seguido de un patrón de zigzag leve.
@@ -538,7 +540,7 @@ String ZigZag(){
     }
   frenar();
   directo();
-  String resul = "Ejecutando un ZigZag;";
+  String resul = "ZigZag;";
   return resul;
 }
 String infinite(){
@@ -559,7 +561,7 @@ String infinite(){
  //detenemos el motor número 2.
  directo();
  String result;
- result = "Circulo a la derecha;";
+ result = "Circle R;";
  return result;
  }
  
@@ -585,7 +587,7 @@ String especial(){
   //luego de los movimintos detiene los motores
   frenar();
   directo();
-  String resul = "movimiento especial";
+  String resul = "Especial";
   return resul; 
   
 }

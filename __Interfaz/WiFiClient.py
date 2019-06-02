@@ -173,16 +173,19 @@ class NodeMCU(Thread):
         """
         response = ""
         if(isinstance(id,str) and ":" in id):
-           index = id.split(":")
-           i = index[0]
-           subi =index[1]
-           if(i.isdigit() and subi.isdigit()):
-               i = int(i)
-               subi = int(subi)
-               if(i<len(self.log)):
-                   response = self.log[i][1].split(";")[subi]
-               else:
-                   print("No se ha enviado el mensaje")
+            index = id.split(":")
+            i = index[0]
+            subi = index[i]
+            if(i.isdigit() and subi.isdigit()):
+                i = int(i)
+                subi = int(subi)
+                if(i<len(self.log)):
+                    if(self.log[i][0] == 'sense;\r'):
+                        response = self.log[i][1].split(";")[:-1]
+                    else:
+                        response = self.log[i][1].split(";")[subi]
+                else:
+                    print("No se ha enviado el mensaje")
         return response
         
                
