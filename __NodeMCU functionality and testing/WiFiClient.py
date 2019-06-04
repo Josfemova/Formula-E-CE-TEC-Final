@@ -180,7 +180,7 @@ class NodeMCU(Thread):
                i = int(i)
                subi = int(subi)
                if(i<len(self.log)):
-                   response = self.log[i][1].split(";")[subi]
+                   response = self.log[i][1]#.split(";")[subi]
                else:
                    print("No se ha enviado el mensaje")
         return response

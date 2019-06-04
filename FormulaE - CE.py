@@ -17,16 +17,18 @@ def cargar_imagen(Nombre):
 pilotos = main_Pilotos()
 autos = main_Autos() 
 
-root = Tk()
-root.title('Prueba de carga')
-root.minsize(830,700)
-root.resizable(width=NO,height=NO)
+Pilots = Tk()
+Pilots.title('Prueba de carga')
+Pilots.minsize(830,700)
+Pilots.resizable(width=NO,height=NO)
 
 uFont = ('Arial', 14)
 uBG = '#FAFAFA'
-c_Main= Canvas(root,width=830,height=700,bd=0, highlightthickness=0, bg= uBG)
-#c_Main.place(relx=0.5,rely=0.5, anchor ='c')
-c_Main.pack(expand=2, anchor='c', fill=Y)
+C_Pil= Canvas(Pilots,width=830,height=700,bd=0, highlightthickness=0, bg= uBG)
+#C_Pil.place(relx=0.5,rely=0.5, anchor ='c')
+C_Pil.pack(expand=2, anchor='c', fill=Y)
+C_Pil.fondoPil = fondoPil = cargar_imagen("fondoHistorial.png")
+C_Pil.create_image(0,0, image =fondoPil, anchor = NW)
 
 
 elements = []
@@ -55,9 +57,9 @@ def cargarAutos():
         elementsA.append(listBoxAut.insert("", "end", values=data))
 
 #Organizacion del TreeView de Pilotos
-labelPil = Label(c_Main, text="Pilotos",bg=uBG, font=("Arial",30)).grid(row=0, columnspan=3)
+labelPil = Label(C_Pil, text="Pilotos",bg=uBG, font=("Arial",30)).grid(row=0, columnspan=3)
 cols = ('Pos','Nombre Completo',"Edad","Nacionalidad","Tempo","Eventos","Podio","Victorias","Abandonos","REP","RGP")
-listBox = ttk.Treeview(c_Main,columns=cols, show='headings')
+listBox = ttk.Treeview(C_Pil,columns=cols, show='headings', bg = 'black', fg = 'white')
 for col in cols:
     listBox.heading(col, text=col)
 listBox.heading('REP', command =lambda : cargarPilotos("REP"))
@@ -73,9 +75,9 @@ listBox.grid(row=1, column=0, columnspan=2)
 
 #Organización del TreeView de Autos
 
-labelAutos = Label(c_Main, text="Autos",bg=uBG, font=("Arial",30)).grid(row=4, columnspan=3)
+labelAutos = Label(C_Pil, text="Autos",bg=uBG, font=("Arial",30)).grid(row=4, columnspan=3)
 colsAut = ('Marca','Modelo','Origen','Temporada','Baterias','CPB','VoltPB','Estado','Consumo','sensores','Peso','Eficiencia')
-listBoxAut = ttk.Treeview(c_Main,columns=colsAut, show='headings')
+listBoxAut = ttk.Treeview(C_Pil,columns=colsAut, show='headings')
 for col in colsAut:
     listBoxAut.heading(col, text=col)
 for i in range(0, len(colsAut)):
@@ -84,9 +86,9 @@ listBoxAut.grid(row=5, column=0, columnspan=2)
 
 
 
-def agregarPiloto():
+def agregarPiloto(parent = Pilots):
     global cols
-    root.withdraw()
+    parent.withdraw()
     AP=Toplevel()
     AP.title("Agregar Piloto")
     AP.minsize(320,270)
@@ -95,7 +97,7 @@ def agregarPiloto():
     CAP.place(x=0, y=0, anchor =NW)
     
     def closeAP():
-        root.deiconify()
+        parent.deiconify()
         AP.destroy()
         cargarPilotos(pilotos.CURRENTORDER)
         
@@ -152,11 +154,11 @@ def agregarPiloto():
 
 
 
-def modificarPiloto(piloto):
+def modificarPiloto(piloto, parent = Pilots):
     if piloto == []:
         return
     global cols
-    root.withdraw()
+    parent.withdraw()
     AP=Toplevel()
     AP.title("Modificar Piloto")
     AP.minsize(320,270)
@@ -166,7 +168,7 @@ def modificarPiloto(piloto):
     
     def closeAP():
         global cargarPilotos, ordenActual,pilotos
-        root.deiconify()
+        parent.deiconify()
         AP.destroy()
         cargarPilotos(pilotos.CURRENTORDER)
         
@@ -204,9 +206,9 @@ def modificarPiloto(piloto):
     Btn_agregar = Button(CAP, width=25,text="Guardar",command=enviar).place(x = 10, y = 220)
 
 
-def agregarAuto():
+def agregarAuto(parent = Pilots):
     global colsAut
-    root.withdraw()
+    parent.withdraw()
     Aa=Toplevel()
     Aa.title("Agregar Auto")
     Aa.minsize(320,340)
@@ -215,7 +217,7 @@ def agregarAuto():
     CAP.place(x=0, y=0, anchor =NW)
     
     def closeAP():
-        root.deiconify()
+        parent.deiconify()
         Aa.destroy()
         cargarAutos()
         
@@ -252,11 +254,11 @@ def agregarAuto():
 
     
 
-def modificarAuto(Auto,pos):
+def modificarAuto(Auto,pos, parent = Pilots):
     if Auto == []:
         return
     global colsAut
-    root.withdraw()
+    parent.withdraw()
     Aa=Toplevel()
     Aa.title("Modificar Auto")
     Aa.minsize(320,330)
@@ -266,7 +268,7 @@ def modificarAuto(Auto,pos):
     
     def closeAP():
         global cargarAutos, autos
-        root.deiconify()
+        parent.deiconify()
         Aa.destroy()
         cargarAutos()
         
@@ -324,14 +326,14 @@ def verFoto(indAuto):
 
 
 
-Btn_modificar = Button(c_Main, text = "modificar información", width = 50, command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =1)
-Btn_agregar = Button(c_Main, text="agregar piloto", width=50, command=lambda: agregarPiloto()).grid(row = 2, column = 0 )
-Btn_TestDrive = Button(c_Main, text="TestDrive", width=50, command=lambda: cargarPilotos("REP")).grid(row=3, columnspan = 3 )
+Btn_modificar = Button(C_Pil, text = "modificar información", width = 50, command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =1)
+Btn_agregar = Button(C_Pil, text="agregar piloto", width=50, command=lambda: agregarPiloto()).grid(row = 2, column = 0 )
+Btn_TestDrive = Button(C_Pil, text="TestDrive", width=50, command=lambda: cargarPilotos("REP")).grid(row=3, columnspan = 3 )
 
-Btn_modificarA = Button(c_Main, text = "modificar información", width = 50, command = lambda: modificarAuto(list(listBoxAut.item(listBoxAut.selection(),'values')), listBoxAut.index(listBoxAut.selection()))).grid(row= 6, column =1)
-Btn_agregarA = Button(c_Main, text="agregar auto", width=50, command=lambda: agregarAuto()).grid(row = 6, column = 0 )
-Btn_VerFoto = Button(c_Main, text="Ver foto", width=50, command=lambda: verFoto(listBoxAut.index(listBoxAut.selection()))).grid(row=7, columnspan = 3 )
+Btn_modificarA = Button(C_Pil, text = "modificar información", width = 50, command = lambda: modificarAuto(list(listBoxAut.item(listBoxAut.selection(),'values')), listBoxAut.index(listBoxAut.selection()))).grid(row= 6, column =1)
+Btn_agregarA = Button(C_Pil, text="agregar auto", width=50, command=lambda: agregarAuto()).grid(row = 6, column = 0 )
+Btn_VerFoto = Button(C_Pil, text="Ver foto", width=50, command=lambda: verFoto(listBoxAut.index(listBoxAut.selection()))).grid(row=7, columnspan = 3 )
 
 cargarPilotos(pilotos.CURRENTORDER)
 cargarAutos()
-#root.mainloop()
+#Pilots.mainloop()

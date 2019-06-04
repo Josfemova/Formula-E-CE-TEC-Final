@@ -89,7 +89,8 @@ from time import sleep
 #___/Obejtos globales
 pilotos = main_Pilotos()
 autos = main_Autos() 
-
+TTFont = ('Helvetica', 30, 'bold italic')
+nnFont = ('Helvetica', 15, 'bold italic') 
 
 
 def cargar_imagen(Nombre):
@@ -124,6 +125,11 @@ def btn_pilots():
     Main.withdraw()
     pilots_window()
 
+def closeX(widgetObj,parent=''):
+    widgetObj.destroy()
+    if parent !='':
+        parent.deiconify()
+    
 def btn_back(Window):
     Window.destroy()
     Main.deiconify()
@@ -148,21 +154,42 @@ def about_window():
     BtnBack1.place(x = 600, y = 500)
 
 #-----Se termina la venta about y se define la ventana de pruebas
-def test_drive_window(pilotoIndex = 0):
+def test_drive_window(pilotoIndex, parent=Main):
     #Valor inicial de las variables globales para esta ventana
     celebracion = pilotos.getCelebracion(pilotoIndex)
+    
     carro = int(pilotos.info[pilotoIndex][pilotos.iTEMPO])
+    print(carro)
+
+    deEscuderia = False
     for i in range(0,len(autos.info)):
         if (autos.info[i][autos.iTEMPO] == carro):
             carro = i
-            i=len(autos.info)
-            print(carro)
+            deEscuderia = True
+            pass
+        
+    if deEscuderia:
+        if autos.info[carro][autos.iESTADO] == 'Disponible':
+            pass
+    else:
+        messagebox.showinfo('Error','AUTO no se encuentra disponible')
+        return
+
+    parent.withdraw()
+    def closeTestDrive():
+        nonlocal ActiveWindow
+        ActiveWindow = False
+        sleep(1)
+        closeX(TestDrive)
+        parent.deiconify()
+        myCar.stop()
             
     
     Speed = 0
     Moving,WPressed,APressed,SPressed,DPressed,ZPressed,XPressed,CPressed,FPressed,BlinkZ,BlinkC,SentBackON,SentBackOFF = (False,)*13
     FLight = True
     Blight = True
+    ActiveWindow = True
     BlightCount = 0
     
     #Valor inicial del auto al entrar a la ventana
@@ -218,35 +245,39 @@ def test_drive_window(pilotoIndex = 0):
     myCar = NodeMCU()
     myCar.start()
       
-    BtnBack2= Button(TestCanv, text = "Main", command = lambda: btn_back(TestDrive), fg= "cyan", bg= "black")
+    BtnBack2= Button(TestCanv, text = "Main", command = closeTestDrive, fg= "cyan", bg= "black")
     BtnBack2.place(x= 1100, y =600)
 
     #Código para trabajar los casos con las teclas de movimiento
     #Se define un evento de mapeo de teclas para la ventana:
     #Función send para enviar los comandos al NodeMCU
     #Esta función es una modificación a la dada en el archivo TelemetryLog por Santiago Gamboa
-    def send(Msg):
+    def send(Msg, returnAns = False):
         """
         Función send para enviar comandos al Node
         Esta funcion es una modificación a la dada en el archivo TelemetryLog por Santiago Gamboa (Asistente del Curso)
         """
         if(len(Msg)>0 and Msg[-1] == ";"):
-            myCar.send(Msg)
-        else:
-            return
+            response = myCar.send(Msg)
+            if returnAns:
+                return response
     #--------------------
     def check_sense():
-        while True:
+        while ActiveWindow:
             Command = myCar.send("sense;")
-            sleep(9);
+            sleep(4);
+            response = myCar.readById(Command)
+            dia_noche(response)
+            bateria(response)
+            
         
     ThreadSense = Thread(target = check_sense)
     ThreadSense.start()
 
-    def get_log():
-        """
+    """def get_log():
+    
         Hilo que actualiza los Text cada vez que se agrega un nuevo mensaje al log de myCar
-        """
+        
         indice = 0
         while(myCar.loop):
             while(indice < len(myCar.log)):
@@ -262,14 +293,15 @@ def test_drive_window(pilotoIndex = 0):
                     Bat = Thread(target = bateria, args = [Answer])
                     Bat.start()
                 indice+=1
-            sleep(0.200)
+            sleep(0.200)"""
 
     def dia_noche(Answer):
         #Validar la posición del caracter en el que la LDR manda la variable light
-        if Answer[-4] == "0":
+        
+        if Answer[-3] == "0":
             TestCanv.itemconfig("dia", state = HIDDEN)
             TestCanv.itemconfig("noche", state = NORMAL)
-        elif Answer[-4] == "1":
+        elif Answer[-3] == "1":
             TestCanv.itemconfig("dia", state = NORMAL)
             TestCanv.itemconfig("noche", state = HIDDEN)
         else:
@@ -278,21 +310,21 @@ def test_drive_window(pilotoIndex = 0):
     def bateria(Answer):
         #print("entered")
         #nonlocal Battery
-        if len(Answer) == 15:
+        if len(Answer) == 14:
             Battery = Answer[5]
             TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
-        elif len(Answer) == 16:
+        elif len(Answer) == 15:
             Battery = Answer[5:7]
             TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
-        elif len(Answer) == 17:
+        elif len(Answer) == 16:
             Battery = Answer[5:8]
             TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
         else:
             return
 
 
-    p = Thread(target=get_log)
-    p.start()
+    #p = Thread(target=get_log)
+    #p.start()
     #------------------
     def WASD_Press(event):
         """
@@ -403,8 +435,14 @@ def test_drive_window(pilotoIndex = 0):
                 Speed += 100
                 TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
                 #print("incremented speed to " + str(Speed))
-                sleep(1)
+                sleep(0.2)
             else:
+                if -500<Speed<=0:
+                    send("pwm:" + str(Speed) + ";")
+                    Speed += 100
+                    TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
+                    sleep(0.1)
+                    
             #en este último caso, la velocidad va a ser mayor que 0, por lo cual se trata normalmente.
                 if Speed >= -100:
                     if not SentBackOFF:
@@ -420,18 +458,18 @@ def test_drive_window(pilotoIndex = 0):
                 
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) + "%")
         #print("incremented speed to " + str(Speed) + " and exited first while")
-        sleep(1)
+        #sleep(1)
         #la función entra a este while cuando salga del primero, que es mayor a 500.
         while 900>= Speed >= 400 and WPressed and not SPressed:
             Speed += 100
             send("pwm:" + str(Speed) + ";")
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
             #print("sent to move forward by " + str(Speed))
-            sleep(1)
+            sleep(0.3)
         #send("pwm:" + str(Speed) + ";")
         #print("sent to move forward by " + str(Speed) + " and exited second while")
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-        sleep(1)
+        #sleep(0.3)
         #---------------------------------------------
     def gradual_back():
         """
@@ -446,22 +484,23 @@ def test_drive_window(pilotoIndex = 0):
                 Speed -= 100
                 TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
                 #print("decremented speed to " + str(Speed))
-                sleep(1)
+                sleep(0.1)
             else:
                 Speed -= 100
+                send("pwm:" + str(Speed) + ";")
                 TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
                 #print("decremented speed to " + str(Speed))
-                sleep(1)
+                sleep(0.1)
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
         #print("decremented speed to " + str(Speed) + " and exited first while")
-        sleep(1)
+        #sleep(1)
         #la función entra a este while cuando salga del primero, que es menor a 500.
         while -900<=Speed<=-400 and SPressed and not WPressed:
             Speed -= 100
             send("pwm:" + str(Speed) + ";")
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
             #print("sent to move backwards by " + str(Speed))
-            sleep(1)
+            sleep(0.5)
         #send("pwm:" + str(Speed) + ";")
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
         #print("sent to move backwards by " + str(Speed) + " and exited second while")
@@ -485,7 +524,7 @@ def test_drive_window(pilotoIndex = 0):
     def blink_lights(Direction, Counter):
         nonlocal ZPressed, CPressed, XPressed, BlinkC, BlinkZ
         if Direction == "L":
-            while BlinkZ:
+            while BlinkZ and ActiveWindow:
                 LED = Counter%2
                 send("ll:" + str(LED) + ";")
                 if LED == 1:
@@ -501,7 +540,7 @@ def test_drive_window(pilotoIndex = 0):
             TestCanv.itemconfig("left", state = HIDDEN)
             #print("Left light is OFF and exited while")
         elif Direction == "R":
-            while BlinkC:
+            while BlinkC and ActiveWindow:
                 LED = Counter%2
                 send("lr:" + str(LED) + ";")
                 if LED == 1:
@@ -567,7 +606,7 @@ def test_drive_window(pilotoIndex = 0):
     def back_light_control_release():
         nonlocal SPressed, SentBackON, SentBackOFF, Speed, WPressed
         #print(SPressed)
-        while not SPressed:
+        while not SPressed and ActiveWindow:
             while Speed >= 0:
                 if SentBackOFF:
                     return
@@ -591,53 +630,390 @@ def test_drive_window(pilotoIndex = 0):
 
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
     TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
+
+
     
-    TestDrive.protocol("WM_DELETE_WINDOW", lambda : closeX(TestDrive))
+    TestDrive.protocol("WM_DELETE_WINDOW", closeTestDrive)
     def ejecutarCelebracion():
         nonlocal celebracion
         for x in celebracion:
             send(x)
         
-    
-
+############################################   
+############################################
+            ############################################
+            ############################################
+            ############################################
+            ############################################
+            ############################################
+            ############################################
 #-----Se termina la ventana de pruebas y se define la de los pilotos
-def pilots_window():
-    
+def pilots_window(parent = Main):
+    global pilotos,autos, TTFont, nnFont
     Pilots = Toplevel()
     Pilots.title("Pilots")
-    Pilots.minsize(width= 800, height= 1000)
+    Pilots.minsize(width= 850, height= 720)
     Pilots.resizable(width= NO, height= NO)
-    #Se genera el canvas
-    PilotsCanv= Canvas(Pilots, width = 800, height = 1000)
-    PilotsCanv.place(relx = 0.5,rely=0.5)
-    #Se debe programar el resto del funcionamiento del módulo antes de declararlo como listo
     
-    #Por ahora se tiene el botón de atras:
+    uFont = ('Helvetica', 14, 'bold italic')
+    uBG = '#FAFAFA'
+
+
+
+    
+    C_Pil= Canvas(Pilots,width=850,height=720,bd=0, highlightthickness=0, bg= uBG)
+    #C_Pil.place(relx=0.5,rely=0.5, anchor ='c')
+    C_Pil.pack(expand=2, anchor='c', fill=Y)
+    C_Pil.fondoPil = fondoPil = cargar_imagen("fondoHistorial.png")
+    C_Pil.create_image(-400,0, image =fondoPil, anchor = NW)
+
+
+    elements = []
+    def cargarPilotos(param):
+        global pilotos
+        nonlocal elements
+        pilotos.ordenar(param)
+        for x in elements:
+            listBox.delete(x)
+        elements = []
+        for i in range(0, len(pilotos.info)):
+            data = [i+1]+pilotos.info[i][pilotos.iNOM:pilotos.iMOV] + pilotos.info[i][pilotos.iPARTICIPA:]
+            data = tuple(data)
+            elements.append(listBox.insert("", "end", values=data))
+            
+    elementsA = []
+    C_Pil.fotoprueba = ft = cargar_imagen("BackL.png")
+    def cargarAutos():
+        global autos
+        nonlocal elementsA
+        autos.ordenar()
+        for x in elementsA:
+            listBoxAut.delete(x)
+        elementsA= []
+        for i in range(0, len(autos.info)):
+            data = autos.info[i][:autos.iFOTO] + autos.info[i][autos.iTEMPO:]
+            data = tuple(data)
+            elementsA.append(listBoxAut.insert("", "end", values=data,image = ft))
+
+    #Organizacion del TreeView de Pilotos
+    txtBG = 'black'
+    labelPil = Label(C_Pil, text="Pilotos",bg=txtBG,fg = uBG, font=TTFont).grid(row=0, columnspan=3)
+    cols = ('Pos','Nombre Completo',"Edad","Nacionalidad","Tempo","Eventos","Podio","Victorias","Abandonos","REP","RGP")
+    listBox = ttk.Treeview(C_Pil,columns=cols, show='headings',height = 3)
+    for col in cols:
+        listBox.heading(col, text=col)
+    listBox.heading('REP', command =lambda : cargarPilotos("REP"))
+    listBox.heading('RGP', command =lambda : cargarPilotos("RGP"))
+
+    listBox.column(cols[0], width = 30, anchor = 'c')
+    listBox.column(cols[1], width = 120, anchor = 'c')
+    listBox.column(cols[2], width = 40, anchor = 'c')
+    listBox.column(cols[3], width = 90, anchor = 'c')
+    for i in range(3, len(cols)):
+        listBox.column(cols[i], width = 80, anchor = 'c')
+    listBox.grid(row=1, column=0, columnspan=2)
+
+    #Organización del TreeView de Autos
+    
+    style = ttk.Style(C_Pil)
+    style.configure('Treeview', rowheight=70)
+    #style.layout("listBoxAut", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
+    #style.layout("TreeView",[('mystyle.Treeview.treearea',{'sticky': 'nswe'})])
+
+    labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
+    colsAut = ('Marca','Modelo','Origen','Temporada','Baterias','CPB','VoltPB','Estado','Consumo','sensores','Peso','Eficiencia')
+    listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 3)#, show='headings')
+    for col in colsAut:
+        listBoxAut.heading(col, text=col)
+    for i in range(0, len(colsAut)):
+        listBoxAut.column(colsAut[i], width =70, anchor ='c')
+    listBoxAut.column('#0', width = 70)
+    listBoxAut.column(colsAut[5], width = 30, anchor = 'c')
+    listBoxAut.column(colsAut[6], width = 30, anchor = 'c')
+
+    listBoxAut.grid(row=5, column=0, columnspan=2)
+
+
+
+
+    def agregarPiloto(parent = Pilots):
+        nonlocal cols
+        parent.withdraw()
+        AP=Toplevel()
+        AP.title("Agregar Piloto")
+        AP.minsize(320,270)
+        AP.resizable(width=NO,height=NO)
+        CAP = Canvas(AP, width = 320, height = 270)
+        CAP.place(x=0, y=0, anchor =NW)
         
-    BtnBack3= Button(PilotsCanv, text ="Main",command = lambda: btn_back(Pilots), fg= "cyan", bg = "black")
-    BtnBack3.place(x= 200, y =100)
-    Pilots.protocol("WM_DELETE_WINDOW", lambda : closeX(Pilots))
+        def closeAP():
+            parent.deiconify()
+            AP.destroy()
+            cargarPilotos(pilotos.CURRENTORDER)
+            
+        hojaTec= []
+        for i in range(1,len(cols)-2):
+            Label(CAP, text = cols[i]).place(x=5,y=(20*i)+20)
+            entryText=Entry(CAP,width=30, justify = CENTER)
+            entryText.place(x=120, y=(20*i)+20)
+            hojaTec.append(entryText)
+        
+        def enviar():
+            global pilotos
+            nonlocal hojaTec, closeAP
+            
+            def createCeleb():
+                newCeleb = "pwm=0"
+                for x in range(0,5):
+                    mov = randint(0, 5)
+                    if mov == 0:
+                        newCeleb += ".dir=1"
+                    elif mov == 1:
+                        newCeleb += ".dir=-1"
+                    elif mov == 2:
+                        newCeleb += ".dir=0"
+                    elif mov == 3:
+                        newCeleb += ".pwm=" + str(randint(700, 1023))
+                    elif mov == 4:
+                        newCeleb += ".pwm="+ str(randint(-1023, -700))
+                    elif mov == 5:
+                        newCeleb += ".zigzag"
+                return newCeleb
+            
+            newData = []
+            for x in hojaTec:
+                newData.append(x.get())                   
+            for i in range(0, len(newData)):
+                if i!= 0 and i!= 2 :
+                    try:
+                        float(newData[i])
+                    except:
+                        print(newData[i])
+                        i= len(newData)
+                        print(newData)
+                        print("error")
+            newData.insert(pilotos.iMov, createCeleb())
+            tuple(newData)
+            pilotos.agregarPiloto(*newData)
+            closeAP()
+
+            
+            
+        Btn_cerrar = Button(CAP, width=25,text="Cerrar",command=closeAP).place(x = 10, y=5)
+        Btn_agregar = Button(CAP, width=25,text="Agregar",command=enviar).place(x = 10, y = 220)
+
+
+
+    def modificarPiloto(piloto, parent = Pilots):
+        if piloto == []:
+            return
+        nonlocal cols
+        parent.withdraw()
+        AP=Toplevel()
+        AP.title("Modificar Piloto")
+        AP.minsize(320,270)
+        AP.resizable(width=NO,height=NO)
+        CAP = Canvas(AP, width = 320, height = 270)
+        CAP.place(x=0, y=0, anchor =NW)
+        
+        def closeAP():
+            global pilotos
+            nonlocal cargarPilotos
+            parent.deiconify()
+            AP.destroy()
+            cargarPilotos(pilotos.CURRENTORDER)
+            
+        hojaTec= []
+        for i in range(1,len(cols)-2):
+            Label(CAP, text = cols[i]).place(x=5,y=(20*i)+20)
+            entryText=Entry(CAP,width=30, justify = CENTER)
+            entryText.place(x=120, y=(20*i)+20)
+            entryText.insert(0,piloto[i])
+            hojaTec.append(entryText)
+        pos = int(piloto[0])-1
+            
+        def enviar():
+            global pilotos
+            nonlocal hojaTec, pos, closeAP
+            newData = []
+            for x in hojaTec:
+                newData.append(x.get())
+            newData.insert(pilotos.iMOV,pilotos.info[pos][pilotos.iMOV])                    
+            newData.insert(0,pos)
+            for i in range(0, len(newData)):
+                if i!= 1 and i!= 3 and i!=5:
+                    try:
+                        float(newData[i])
+                    except:
+                        print(newData[i])
+                        i= len(newData)
+                        print(newData)
+                        print("error")
+            tuple(newData)
+            pilotos.modificarPiloto(*newData)
+            closeAP()
+            
+        Btn_cerrar = Button(CAP, width=25,text="Cerrar",command=closeAP).place(x = 10, y=5)
+        Btn_agregar = Button(CAP, width=25,text="Guardar",command=enviar).place(x = 10, y = 220)
+
+
+    def agregarAuto(parent = Pilots):
+        nonlocal colsAut
+        parent.withdraw()
+        Aa=Toplevel()
+        Aa.title("Agregar Auto")
+        Aa.minsize(320,340)
+        Aa.resizable(width=NO,height=NO)
+        CAP = Canvas(Aa, width = 320, height = 340)
+        CAP.place(x=0, y=0, anchor =NW)
+        
+        def closeAP():
+            parent.deiconify()
+            Aa.destroy()
+            cargarAutos()
+            
+        hojaTec= []
+        for i in range(0,len(colsAut)):
+            Label(CAP, text = colsAut[i]).place(x=5,y=(20*(i+1))+20)
+            entryText=Entry(CAP,width=30, justify = CENTER)
+            entryText.place(x=120, y=(20*(i+1))+20)
+            hojaTec.append(entryText)
+            
+        Label(CAP, text = 'Archivo Foto').place(x=5,y=(20*(len(colsAut)+1))+20)
+        entryText=Entry(CAP,width=30, justify = CENTER)
+        entryText.place(x=120, y=(20*(len(colsAut)+1))+20)
+        hojaTec.append(entryText)   
+        
+        def enviar():
+            global pilotos
+            nonlocal hojaTec, closeAP
+            
+            newData = []
+            for x in hojaTec:
+                newData.append(x.get())
+            newData.insert(autos.iFOTO, newData[-1])
+            newData.pop(-1)
+            tuple(newData)
+            autos.agregarAuto(*newData)
+            closeAP()
+
+            
+            
+        Btn_cerrar = Button(CAP, width=25,text="Cerrar",command=closeAP).place(x = 10, y=5)
+        Btn_agregar = Button(CAP, width=25,text="Agregar",command=enviar).place(x = 10, y = 310)
+
+
+        
+
+    def modificarAuto(Auto,pos, parent = Pilots):
+        if Auto == []:
+            return
+        nonlocal colsAut
+        parent.withdraw()
+        Aa=Toplevel()
+        Aa.title("Modificar Auto")
+        Aa.minsize(320,330)
+        Aa.resizable(width=NO,height=NO)
+        CAP = Canvas(Aa, width = 320, height = 330)
+        CAP.place(x=0, y=0, anchor =NW)
+        
+        def closeAP():
+            global autos
+            nonlocal cargarAutos
+            parent.deiconify()
+            Aa.destroy()
+            cargarAutos()
+            
+        hojaTec= []
+        for i in range(0,len(colsAut)-1):
+            Label(CAP, text = colsAut[i]).place(x=5,y=(20*(i+1))+20)
+            entryText=Entry(CAP,width=30, justify = CENTER)
+            entryText.place(x=120, y=(20*(i+1))+20)
+            entryText.insert(0,Auto[i])
+            hojaTec.append(entryText)
+            
+        Label(CAP, text = "Archivo Foto").place(x=5,y=(20*(len(colsAut)+1))+20)
+        entryText=Entry(CAP,width=30, justify = CENTER)
+        entryText.place(x=120, y=(20*(len(colsAut)+1))+20)
+        entryText.insert(0,autos.info[pos][autos.iFOTO])
+        hojaTec.append(entryText)
+            
+        def enviar():
+            global autos
+            nonlocal hojaTec, closeAP,pos
+            newData = []
+            for x in hojaTec:
+                newData.append(x.get())
+                
+            newData.insert(autos.iFOTO,newData[-1])
+            newData.pop(-1)
+            newData.insert(autos.iEFICIENCIA,autos.info[pos][autos.iEFICIENCIA])   
+            newData.insert(0,pos)
+            tuple(newData)
+            autos.modificarAuto(*newData)
+            closeAP()
+            
+        Btn_cerrar = Button(CAP, width=25,text="Cerrar",command=closeAP).place(x = 10, y=5)
+        Btn_agregar = Button(CAP, width=25,text="Guardar",command=enviar).place(x = 10, y = 300)
+
+    def verFoto(indAuto):
+        global autos
+        TkFoto = Toplevel()
+        TkFoto.title("Foto")
+        TkFoto.minsize(600,400)
+        TkFoto.resizable(width=NO,height=NO)
+        CAP = Canvas(TkFoto, width = 600, height = 400)
+        CAP.place(x=0, y=0, anchor =NW)
+        try:
+            foto = cargar_imagen(autos.info[indAuto][autos.iFOTO])
+        except:
+            messagebox.showinfo('Error','ruta de imagen no valida')
+            TkFoto.destroy()
+            return
+        CAP.create_image(0,0, image=foto, anchor = NW)
+        CAP.fotoAuto = foto
+        TkFoto.protocol("WM_DELETE_WINDOW", lambda : TkFoto.destroy())
+        
 
 
 
 
+    Btn_modificar = Button(C_Pil, text = "modificar información",font=nnFont, width = 25,bg=txtBG,fg = uBG,
+                           command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =1)
+    
+    Btn_agregar = Button(C_Pil, text="agregar piloto",font=nnFont, width=25,bg=txtBG,fg = uBG,
+                         command=lambda: agregarPiloto()).grid(row = 2, column = 0 )
+    
+    Btn_TestDrive = Button(C_Pil, text="TestDrive",font=nnFont, width=25,bg=txtBG,fg = uBG,
+                           command=lambda: test_drive_window(listBox.index(listBox.selection()),Pilots)).grid(row=3, columnspan = 3 )
 
 
+    Btn_modificarA = Button(C_Pil, text = "modificar información",font=nnFont, width =25,bg=txtBG,fg = uBG,
+                            command = lambda: modificarAuto(list(listBoxAut.item(listBoxAut.selection(),'values')),
+                                                            listBoxAut.index(listBoxAut.selection()))).grid(row= 6, column =1)
+    
+    Btn_agregarA = Button(C_Pil, text="agregar auto",font=nnFont, width=25,bg=txtBG,fg = uBG,
+                          command=lambda: agregarAuto()).grid(row = 6, column = 0 )
+    
+    Btn_VerFoto = Button(C_Pil, text="Ver foto",font=nnFont, width=25,bg=txtBG,fg = uBG,
+                         command=lambda: verFoto(listBoxAut.index(listBoxAut.selection()))).grid(row=7, columnspan = 3 )
 
+    cargarPilotos(pilotos.CURRENTORDER)
+    cargarAutos()
 
-def closeX(widgetObj):
-    widgetObj.destroy()
+    Pilots.protocol("WM_DELETE_WINDOW", lambda : closeX(Pilots, Main))
+
 
     
-btnFont = ('Helvetica', 30, 'bold italic')   
+  
 #------Comandos de los Botones en Main------
-BtnAbout= Button(MainCanv, text= "About",font = btnFont, command = btn_about,fg= "#FAFAFA",bg ="black") #Para ir a About
+BtnAbout= Button(MainCanv, text= "Informacion",font = TTFont, command = btn_about,fg= "#FAFAFA",bg ="black") #Para ir a About
 BtnAbout.place(x = 100,y = 100)
 
-BtnTest= Button(MainCanv, text= "Test Drive", font = btnFont,command = btn_test,fg= "#FAFAFA",bg ="black")  #Para ir a TestDrive
+BtnTest= Button(MainCanv, text= "Test Drive", font = TTFont,command = btn_test,fg= "#FAFAFA",bg ="black")  #Para ir a TestDrive
 BtnTest.place(x = 400, y = 100)
 
-BtnPilots = Button(MainCanv, text= "Pilots",font = btnFont, command = btn_pilots,fg= "#FAFAFA",bg ="black") #Para ir a Pilots
+BtnPilots = Button(MainCanv, text= "Pilotos",font = TTFont, command = btn_pilots,fg= "#FAFAFA",bg ="black") #Para ir a Pilots
 BtnPilots.place(x = 800, y = 100)
 Main.protocol("WM_DELETE_WINDOW", lambda : closeX(Main))
     

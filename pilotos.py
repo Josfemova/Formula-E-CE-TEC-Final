@@ -14,6 +14,7 @@ class main_Pilotos:
     iABANDO=8
     iREP = 9
     iRGP = 10
+    iFOTO= 11
     txtfile = "__InfoEscuderías\\EscuderiaInfo.txt"
     CURRENTORDER = "REP"
     
@@ -117,7 +118,7 @@ class main_Pilotos:
             if param== "RGP" or param == "REP":
                 self.CURRENTORDER = param
                 self.actualizarArchivo()
-                self.info = self.ordenar_aux("", param)
+                self.info = self.ordenar_aux("", param)[::-1]
                 self.actualizarArchivo()
             else:
                 return "parametro no valido"
