@@ -1,1 +1,1 @@
-Samsung:AMD:Panasonic:EA:BoringCompany
+ARM:Panasonic:AMD
