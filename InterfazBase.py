@@ -181,12 +181,13 @@ def test_drive_window(pilotoIndex, parent=Main):
         ActiveWindow = False
         try:
             Answer = (send("sense;",True).split(";"))[1]
-            battery = int(Answer[5:])
-            if battery < 10:
-                data = autos.info[carro]
-                data[autos.iESTADO]="Descargado"
-                data.insert(0, carro)
-                autos.modificarAuto(*tuple(data))
+            if "blvl:" in Answer:
+                battery = int(Answer[5:])
+                if battery < 10:
+                    data = autos.info[carro]
+                    data[autos.iESTADO]="Descargado"
+                    data.insert(0, carro)
+                    autos.modificarAuto(*tuple(data))
         except:
             print("error en lectura de bateria")
 
@@ -672,7 +673,7 @@ def pilots_window(parent = Main):
     
     Pilots = Toplevel()
     Pilots.title("Pilots")
-    Pilots.minsize(width= 1000, height= 720)
+    Pilots.minsize(width= 1000, height= 800)
     Pilots.resizable(width= NO, height= NO)
     
     uFont = ('Helvetica', 14, 'bold italic')
@@ -681,7 +682,7 @@ def pilots_window(parent = Main):
 
 
     
-    C_Pil= Canvas(Pilots,width=1000,height=720,bd=0, highlightthickness=0, bg= uBG)
+    C_Pil= Canvas(Pilots,width=1000,height=800,bd=0, highlightthickness=0, bg= uBG)
     #C_Pil.place(relx=0.5,rely=0.5, anchor ='c')
     C_Pil.pack(expand=2, anchor='c', fill=Y)
     C_Pil.fondoPil = fondoPil = cargar_imagen("fondoHistorial.png")
@@ -753,7 +754,7 @@ def pilots_window(parent = Main):
     txtBG = 'black'
     labelPil = Label(C_Pil, text="Pilotos",bg=txtBG,fg = uBG, font=TTFont).grid(row=0, columnspan=3)
     cols = ('Pos','Nombre Completo',"Edad","Nacionalidad","Tempo","Eventos","Podio","Victorias","Abandonos","REP","RGP")
-    listBox = ttk.Treeview(C_Pil,columns=cols,height = 3)
+    listBox = ttk.Treeview(C_Pil,columns=cols,height = 5)
     for col in cols:
         listBox.heading(col, text=col)
     listBox.heading('REP', command =lambda : cargarPilotos("REP"))
