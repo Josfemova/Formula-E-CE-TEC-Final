@@ -112,6 +112,70 @@ MainCanv.place(x=0,y=0)
 
 MainBG = cargar_imagen("MainFondo.png")
 MainCanv.create_image(0,0,image= MainBG, anchor = NW)
+IGE = MainCanv.create_text(800, 30, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)), font = TTFont, fill = '#FAFAFA')
+NombreEscud = MainCanv.create_text(200, 30, text = "Loui Vcker 2019", font = TTFont, fill = '#FAFAFA')
+
+
+Logo = MainCanv.create_image(620, 200, image = MainBG)
+logoimg ='logo2.PNG'
+logoref=''
+
+newImagen= []
+def recargaInfo():
+    global newImagen,logoimg,Logo,logoref
+    newImagen = []
+    txtpatro = open("__InfoEscuderías\\patrocinadores.txt")
+    l = (txtpatro.readline()).split(":")
+    for i in range(0,len(l)):
+        newImagen.insert(i,[cargar_imagen(l[i]+'.png')])
+        MainCanv.create_image(i*170+200, 600, image = newImagen[i])
+    txtpatro.close()
+    MainCanv.itemconfig(IGE, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)))
+    logoref = cargar_imagen(logoimg)
+    MainCanv.itemconfig(Logo,image =logoref)
+    
+    
+    
+
+    
+    
+def modificarPatro():
+    modPil = Toplevel()
+    modPil.geometry('700x150')
+    modPil.title('Patrocinadores')
+    cmod = Canvas(modPil, width = 700, height = 150)
+    cmod.pack()
+    mensaje = ('si va a agregar un patrocinador, debe '
+               'agregar una imagen con el nombre del patrocinador '
+               'en la carpeta Interfaz//imagenes')
+    Label(cmod, text = mensaje).grid(row=0, column =1 )
+    text = Entry(cmod, justify = CENTER, width = 50, font = nnFont)
+    text.grid(row = 1, column = 1)
+    txtpatro = open("__InfoEscuderías\\patrocinadores.txt")
+    l = txtpatro.readline()
+    text.insert(0,l)
+    txtpatro.close
+    
+
+    def actualizar():
+        txtpatro = open("__InfoEscuderías\\patrocinadores.txt",'w')
+        txtpatro.write(text.get())
+        txtpatro.close()
+        recargaInfo()
+        modPil.destroy()
+        
+    Btn = Button(cmod, text = 'Actualizar', font = TTFont, command = actualizar)
+    Btn.grid(row = 2, column=1)
+
+    
+recargaInfo()
+
+
+
+
+
+
+
 
 def btn_about():
     Main.withdraw()
@@ -127,6 +191,7 @@ def btn_pilots():
 
 def closeX(widgetObj,parent=''):
     widgetObj.destroy()
+    recargaInfo()
     if parent !='':
         parent.deiconify()
 
@@ -156,7 +221,6 @@ def test_drive_window(pilotoIndex, parent=Main):
     
     carro = int(pilotos.info[pilotoIndex][pilotos.iTEMPO])
     print(carro)
-
     deEscuderia = False
     for i in range(0,len(autos.info)):
         if (autos.info[i][autos.iTEMPO] == carro):
@@ -172,6 +236,7 @@ def test_drive_window(pilotoIndex, parent=Main):
             return
     else:
         messagebox.showinfo('Error','AUTO no se encuentra disponible')
+        return
         
 
     parent.withdraw()
@@ -191,11 +256,9 @@ def test_drive_window(pilotoIndex, parent=Main):
         except:
             print("error en lectura de bateria")
 
-
         closeX(TestDrive, parent)
         myCar.stop()
             
-    
     Speed = 0
     Moving,WPressed,APressed,SPressed,DPressed,ZPressed,XPressed,CPressed,FPressed,BlinkZ,BlinkC,SentBackON,SentBackOFF = (False,)*13
     FLight = True
@@ -221,33 +284,39 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestCanv.create_image(0,0,image= FondoNoche, anchor = NW, tags = "noche", state = HIDDEN)
 
     TestDrive.Twl = TopWheelL = cargar_imagen("TLWheel.png")
-    TestCanv.create_image(960,240, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
-    TestCanv.create_image(1032,242, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
+    TestCanv.create_image(860,240, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
+    TestCanv.create_image(932,242, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
 
     TestDrive.Twr = TopWheelR = cargar_imagen("TopWheelRight.png")
-    TestCanv.create_image(963,240, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
-    TestCanv.create_image(1040,238, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
-
-
+    TestCanv.create_image(863,240, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
+    TestCanv.create_image(940,238, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
     TestDrive.Borde = Borde = cargar_imagen("Car1.png")
-    TestCanv.create_image(925,200, image = Borde, anchor = NW,tags = ("fondo","día"))
-
-    TestCanv.create_text(60,300, text = "Escudería",font = ("Consolas",15),fill = "White",tags= "escu")
-    TestCanv.create_text(600,15, text = (autos.info[carro][0] +autos.info[carro][1]) , font = ("Consolas",15),fill = "White",tags = "name")
-    TestCanv.create_text(640,360, text = "PWM:0%", font= ("Consolas",18), fill = "White", tags = "pwm", anchor= CENTER)
-    TestCanv.create_text(1100,500, text = "Charge: %", font = ("Consolas", 18), fill = "white", tags = "battext", anchor = NW)
-
+    TestCanv.create_image(825,200, image = Borde, anchor = NW,tags = ("fondo","día"))
     TestDrive.fl = FrontLight = cargar_imagen("FrontL.png")
-    TestCanv.create_image(965,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
-    TestCanv.create_image(1030,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
-
+    TestCanv.create_image(865,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
+    TestCanv.create_image(930,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
     TestDrive.dirl = DirLight = cargar_imagen("EmL.png")
-    TestCanv.create_image(940,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
-    TestCanv.create_image(1030,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
-
+    TestCanv.create_image(840,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
+    TestCanv.create_image(930,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
     TestDrive.bl = BackLight= cargar_imagen("BackL.png")
-    TestCanv.create_image(955,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
-    TestCanv.create_image(1005,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+    TestCanv.create_image(855,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+    TestCanv.create_image(905,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+    
+    #-----------------------------------------
+    TestCanv.create_text(120,70, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(120,100, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(120,130, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(600,70, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(600,100, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(600,130, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    #-----------------------------------------
+    TestCanv.create_text(600,15, text = (autos.info[carro][0] +autos.info[carro][1]) , font = ("Consolas",15),fill = "White",tags = "name")
+    
+    
+    TestCanv.create_text(620,675, text = "PWM:0%", font= ("Algency FB",18,'bold italic'), fill = "black", tags = "pwm", anchor= NW)
+    TestCanv.create_text(220,190, text = "%", font = ("Algency FB",18,'bold italic'), fill = "black", tags = "battext", anchor = NW)
+
+    
 
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
 
@@ -273,7 +342,7 @@ def test_drive_window(pilotoIndex, parent=Main):
             if returnAns:
                 sleep(4)
                 return myCar.readById(response)
-    #--------------------
+    #-----------------------------------------
     def check_sense():
         while ActiveWindow:
             Command = myCar.send("sense;")
@@ -285,27 +354,6 @@ def test_drive_window(pilotoIndex, parent=Main):
         
     ThreadSense = Thread(target = check_sense)
     ThreadSense.start()
-
-    """def get_log():
-    
-        Hilo que actualiza los Text cada vez que se agrega un nuevo mensaje al log de myCar
-        
-        indice = 0
-        while(myCar.loop):
-            while(indice < len(myCar.log)):
-                mnsSend = "[{0}] cmd: {1}\n".format(indice,myCar.log[indice][0])
-
-                mnsRecv = "{1}\n".format(indice,myCar.log[indice][1])
-                Answer = mnsRecv #Se almacena la variable de retorno en el comando.
-                #print(Answer)
-                #print(len(Answer))
-                if len(Answer) >= 15:
-                    LDR = Thread(target = dia_noche, args = [Answer])
-                    LDR.start()
-                    Bat = Thread(target = bateria, args = [Answer])
-                    Bat.start()
-                indice+=1
-            sleep(0.200)"""
 
     def dia_noche(Answer):
         #Validar la posición del caracter en el que la LDR manda la variable light
@@ -324,20 +372,16 @@ def test_drive_window(pilotoIndex, parent=Main):
         #nonlocal Battery
         if len(Answer) == 14:
             Battery = Answer[5]
-            TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
+            TestCanv.itemconfig("battext", text =(Battery) + "%")
         elif len(Answer) == 15:
             Battery = Answer[5:7]
-            TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
+            TestCanv.itemconfig("battext", text =(Battery) + "%")
         elif len(Answer) == 16:
             Battery = Answer[5:8]
-            TestCanv.itemconfig("battext", text ="Charge: "+ (Battery) + "%")
+            TestCanv.itemconfig("battext", text =(Battery) + "%")
         else:
             return
 
-
-    #p = Thread(target=get_log)
-    #p.start()
-    #------------------
     def WASD_Press(event):
         """
         Función que controla los eventos que se activarán al presionar teclas definidas
@@ -367,7 +411,6 @@ def test_drive_window(pilotoIndex, parent=Main):
             if not APressed and not DPressed:
                 send("dir:-1;")
                 APressed = True
-                #print("sent to turn L")
                 #código para activar o desactivar las imágenes que dan feedback de giro en la interfaz de usuario.
                 TestCanv.itemconfig("tl", state = NORMAL)
             else:
@@ -376,7 +419,6 @@ def test_drive_window(pilotoIndex, parent=Main):
             if not DPressed and not APressed:
                 send("dir:1;")
                 DPressed = True
-                #print("sent to turn R")
                 TestCanv.itemconfig("tr", state = NORMAL)
             else:
                 return
@@ -396,7 +438,6 @@ def test_drive_window(pilotoIndex, parent=Main):
                 BlinkC = False
                 TestCanv.itemconfig("left", state = HIDDEN)
                 TestCanv.itemconfig("right", state = HIDDEN)
-                #print("stopped blinking")
             else:
                 return
         elif Key == "c":
@@ -414,12 +455,10 @@ def test_drive_window(pilotoIndex, parent=Main):
                 if FLight:
                     send("lf:1;")
                     FLight = False
-                    #print("sent to turn front on")
                     TestCanv.itemconfig("front",state = NORMAL)
                 else:
                     send("lf:0;")
                     FLight = True
-                    #print("sent to turn front off")
                     TestCanv.itemconfig("front",state = HIDDEN)
             else:
                 return
@@ -443,45 +482,44 @@ def test_drive_window(pilotoIndex, parent=Main):
             if Speed <= -500:
             #En este caso se trabaja con un aumento de velocidad, en un caso esp. en que esta es menor que -500
                 send("pwm:" + str(Speed) + ";")
-                #print("speed was lower than or at -500 so it was sent before incrementing")
                 Speed += 100
-                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-                #print("incremented speed to " + str(Speed))
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
                 sleep(0.2)
             else:
                 if -500<Speed<=0:
                     send("pwm:" + str(Speed) + ";")
                     Speed += 100
-                    TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
+                    TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
                     sleep(0.1)
                     
             #en este último caso, la velocidad va a ser mayor que 0, por lo cual se trata normalmente.
                 if Speed >= -100:
                     if not SentBackOFF:
                         send("lb:0;")
-                        #print("SentBackOFF")
                         SentBackOFF = True
                         SentBackON = False
                         TestCanv.itemconfig("back", state = HIDDEN)
                 Speed += 100
-                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-                #print("incremented speed to " + str(Speed))
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
                 sleep(1)
                 
-        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) + "%")
-        #print("incremented speed to " + str(Speed) + " and exited first while")
-        #sleep(1)
+        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #la función entra a este while cuando salga del primero, que es mayor a 500.
-        while 900>= Speed >= 400 and WPressed and not SPressed:
-            Speed += 100
-            send("pwm:" + str(Speed) + ";")
-            TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-            #print("sent to move forward by " + str(Speed))
-            sleep(0.3)
-        #send("pwm:" + str(Speed) + ";")
-        #print("sent to move forward by " + str(Speed) + " and exited second while")
-        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-        #sleep(0.3)
+        while 1000>= Speed >= 400 and WPressed and not SPressed:
+            if Speed==1000:
+                Speed += 23
+                send("pwm:" + str(Speed) + ";")
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
+                sleep(0.3)
+            else:
+                Speed += 100
+                send("pwm:" + str(Speed) + ";")
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
+                sleep(0.3)
+            
+        
+            
+        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #---------------------------------------------
     def gradual_back():
         """
@@ -490,32 +528,31 @@ def test_drive_window(pilotoIndex, parent=Main):
         nonlocal Speed,Moving, SPressed, WPressed
         SPressed = True
         while Speed > -400 and SPressed and not WPressed:
-            if Speed >= 500:
+            if Speed==1023:
+                Speed -= 23
                 send("pwm:" + str(Speed) + ";")
-                #print("Speed was higher than or at 500, so it was sent before decrementing")
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
+                sleep(0.3)
+            elif Speed >= 500:
+                send("pwm:" + str(Speed) + ";")
                 Speed -= 100
-                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-                #print("decremented speed to " + str(Speed))
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
                 sleep(0.1)
             else:
                 Speed -= 100
                 send("pwm:" + str(Speed) + ";")
-                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-                #print("decremented speed to " + str(Speed))
+                TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
                 sleep(0.1)
-        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-        #print("decremented speed to " + str(Speed) + " and exited first while")
-        #sleep(1)
+        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #la función entra a este while cuando salga del primero, que es menor a 500.
         while -900<=Speed<=-400 and SPressed and not WPressed:
             Speed -= 100
             send("pwm:" + str(Speed) + ";")
-            TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
+            TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
             #print("sent to move backwards by " + str(Speed))
             sleep(0.5)
-        #send("pwm:" + str(Speed) + ";")
-        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed//10) +"%")
-        #print("sent to move backwards by " + str(Speed) + " and exited second while")
+        
+        TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #-------------------------------------------
     def thread_blink(Direction):
         """
@@ -673,20 +710,25 @@ def pilots_window(parent = Main):
     
     Pilots = Toplevel()
     Pilots.title("Pilots")
-    Pilots.minsize(width= 1000, height= 800)
+    Pilots.minsize(width= 1200, height= 800)
     Pilots.resizable(width= NO, height= NO)
     
     uFont = ('Helvetica', 14, 'bold italic')
-    uBG = '#FAFAFA'
-
-
+    uBG = 'black'
+    txtBG = '#FAFAFA'
 
     
-    C_Pil= Canvas(Pilots,width=1000,height=800,bd=0, highlightthickness=0, bg= uBG)
+    C_Pil= Canvas(Pilots,width=1200,height=800,bd=0, highlightthickness=0, bg= uBG)
     #C_Pil.place(relx=0.5,rely=0.5, anchor ='c')
     C_Pil.pack(expand=2, anchor='c', fill=Y)
     C_Pil.fondoPil = fondoPil = cargar_imagen("fondoHistorial.png")
     C_Pil.create_image(0,0, image =fondoPil, anchor = NW)
+    sepR = Frame(C_Pil, width = 20)
+    sepL = Frame(C_Pil, width = 20)
+    sepLow = Frame(C_Pil, height = 10)
+    sepR.grid(rowspan = 10, column = 0)
+    sepL.grid(rowspan = 10, column = 3)
+    sepLow.grid(column = 0, row = 7, columnspan = 3)
 
 
     elements = []
@@ -722,7 +764,7 @@ def pilots_window(parent = Main):
                 print(e)
             data = [i+1]+pilotos.info[i][pilotos.iNOM:pilotos.iMOV] + pilotos.info[i][pilotos.iPARTICIPA:]
             data = tuple(data)
-            elements.append(listBox.insert("", "end", values=data,image = fotos[i]))
+            elements.append(listBox.insert("", "end", values=data,image = fotos[i], tags = ('elemento',)))
             
     elementsA = []
     def cargarAutos():
@@ -748,48 +790,54 @@ def pilots_window(parent = Main):
                 print(e)
             data = autos.info[i][:autos.iFOTO] + autos.info[i][autos.iTEMPO:]
             data = tuple(data)
-            elementsA.append(listBoxAut.insert("", "end", values=data,image = fotos[i]))
+            elementsA.append(listBoxAut.insert("", "end", values=data,image = fotos[i], tags = ('elemento',)))
 
+
+
+    style = ttk.Style(C_Pil)
+    style.configure('Treeview', rowheight=70, font = ('Helvetica',13,'bold italic'))
+    style.configure('Treeview.Heading', font = ('Helvetica',13,'bold italic'))
     #Organizacion del TreeView de Pilotos
-    txtBG = 'black'
-    labelPil = Label(C_Pil, text="Pilotos",bg=txtBG,fg = uBG, font=TTFont).grid(row=0, columnspan=3)
+    #-------------------------------------------------------------------------
+    Frame(C_Pil, height = 70).grid(row=0, columnspan =4)
+    C_Pil.create_text(550, 20, text = 'Pilotos', fill = txtBG, font = TTFont, anchor = NW)
+    #labelPil = Label(C_Pil, text="Pilotos",bg=txtBG,fg = uBG, font=TTFont).grid(row=0, columnspan=4)
     cols = ('Pos','Nombre Completo',"Edad","Nacionalidad","Tempo","Eventos","Podio","Victorias","Abandonos","REP","RGP")
     listBox = ttk.Treeview(C_Pil,columns=cols,height = 5)
     for col in cols:
         listBox.heading(col, text=col)
     listBox.heading('REP', command =lambda : cargarPilotos("REP"))
     listBox.heading('RGP', command =lambda : cargarPilotos("RGP"))
-    
     listBox.column('#0', width = 150, anchor = 'c')
-    listBox.column(cols[0], width = 30, anchor = 'c')
-    listBox.column(cols[1], width = 120, anchor = 'c')
-    listBox.column(cols[2], width = 40, anchor = 'c')
-    listBox.column(cols[3], width = 90, anchor = 'c')
-    for i in range(3, len(cols)):
+    listBox.column(cols[0], width = 40, anchor = 'c')
+    listBox.column(cols[1], width = 200, anchor = 'c')
+    listBox.column(cols[2], width = 60, anchor = 'c')
+    listBox.column(cols[3], width = 120, anchor = 'c')
+    for i in range(4, len(cols)):
         listBox.column(cols[i], width = 80, anchor = 'c')
-    listBox.grid(row=1, column=0, columnspan=2)
-
+    listBox.grid(row=1, column=1, columnspan=2)
+    #--------------------------------------------------------------------------
 
     #Organización del TreeView de Autos
-    style = ttk.Style(C_Pil)
-    style.configure('Treeview', rowheight=70)
-
-    labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
+    #-------------------------------------------------------------------------
+    Frame(C_Pil, height = 70).grid(row=4, columnspan =4)
+    C_Pil.create_text(550, 550, text = 'Autos', fill = txtBG, font = TTFont, anchor = NW)
+    #labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
     colsAut = ('Marca','Modelo','Origen','Temporada','Baterias','CPB','VoltPB','Estado','Consumo','sensores','Peso','Eficiencia')
     listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 3)
     for col in colsAut:
         listBoxAut.heading(col, text=col)
     listBoxAut.heading('Eficiencia', command =lambda : cargarAutos())
-
     for i in range(0, len(colsAut)):
-        listBoxAut.column(colsAut[i], width =70, anchor ='c')
-        
+        listBoxAut.column(colsAut[i], width =90, anchor ='c')
     listBoxAut.column('#0', width = 150, anchor = 'c')
-    listBoxAut.column(colsAut[5], width = 30, anchor = 'c')
-    listBoxAut.column(colsAut[6], width = 30, anchor = 'c')
+    listBoxAut.column(colsAut[5], width = 50, anchor = 'c')
+    listBoxAut.column(colsAut[6], width = 50, anchor = 'c')
+    listBoxAut.grid(row=5, column=1, columnspan=2)
+    #-------------------------------------------------------------------------
 
-    listBoxAut.grid(row=5, column=0, columnspan=2)
 
+   
 
 
 
@@ -1045,26 +1093,26 @@ def pilots_window(parent = Main):
         TkFoto.protocol("WM_DELETE_WINDOW", lambda : TkFoto.destroy())
         
 
-    Btn_modificar = Button(C_Pil, text = "modificar información",font=nnFont, width = 25,bg=txtBG,fg = uBG,
-                           command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =1)
+    Btn_modificar = Button(C_Pil, text = "modificar información",font=nnFont, width = 25,bg=uBG,fg = txtBG,bd=0,
+                           command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =2)
     
-    Btn_agregar = Button(C_Pil, text="agregar piloto",font=nnFont, width=25,bg=txtBG,fg = uBG,
-                         command=lambda: agregarPiloto()).grid(row = 2, column = 0 )
+    Btn_agregar = Button(C_Pil, text="agregar piloto",font=nnFont, width=25,bg=uBG,fg = txtBG,bd=0,
+                         command=lambda: agregarPiloto()).grid(row = 2, column = 1 )
     
-    Btn_TestDrive = Button(C_Pil, text="TestDrive",font=nnFont, width=25,bg=txtBG,fg = uBG,
-                           command=lambda: test_drive_window(listBox.index(listBox.selection()),Pilots)).grid(row=3, columnspan = 3 )
+    Btn_TestDrive = Button(C_Pil, text="TestDrive",font=nnFont, width=25,bg=uBG,fg = txtBG,bd=0,
+                           command=lambda: test_drive_window(listBox.index(listBox.selection()),Pilots)).grid(row=3, column=2)
 
 
-    Btn_modificarA = Button(C_Pil, text = "modificar información",font=nnFont, width =25,bg=txtBG,fg = uBG,
+    Btn_modificarA = Button(C_Pil, text = "modificar información",font=nnFont, width =25,bg=uBG,fg = txtBG,bd=0,
                             command = lambda: modificarAuto(list(listBoxAut.item(listBoxAut.selection(),'values')),
-                                                            listBoxAut.index(listBoxAut.selection()))).grid(row= 6, column =1)
+                                                            listBoxAut.index(listBoxAut.selection()))).grid(row= 6, column =2)
     
-    Btn_agregarA = Button(C_Pil, text="agregar auto",font=nnFont, width=25,bg=txtBG,fg = uBG,
-                          command=lambda: agregarAuto()).grid(row = 6, column = 0 )
-##    
-##    Btn_VerFoto = Button(C_Pil, text="Ver foto",font=nnFont, width=25,bg=txtBG,fg = uBG,
-##                         command=lambda: verFoto(listBoxAut.index(listBoxAut.selection()))).grid(row=7, columnspan = 3 )
+    Btn_agregarA = Button(C_Pil, text="agregar auto",font=nnFont, width=25,bg=uBG,fg = txtBG,bd=0,
+                          command=lambda: agregarAuto()).grid(row = 6, column = 1 )
 
+    Btn_Atras = Button(C_Pil, text="Atrás",font=nnFont, width=25,bg=uBG,fg = txtBG,
+                          command=lambda: closeX(Pilots, Main)).place(x=10,y=10)
+    
     cargarPilotos(pilotos.CURRENTORDER)
     cargarAutos()
 
@@ -1074,11 +1122,15 @@ def pilots_window(parent = Main):
     
   
 #------Comandos de los Botones en Main------
-BtnAbout= Button(MainCanv, text= "Informacion",font = TTFont, command = btn_about,fg= "#FAFAFA",bg ="black") #Para ir a About
+BtnAbout= Button(MainCanv, text= "Información",font = TTFont, command = btn_about,fg= "#FAFAFA",bg ="black") #Para ir a About
 BtnAbout.place(x = 100,y = 100)
 
-BtnPilots = Button(MainCanv, text= "Pilotos",font = TTFont, command = btn_pilots,fg= "#FAFAFA",bg ="black") #Para ir a Pilots
+BtnPilots = Button(MainCanv, text= "Autos y Pilotos",font = TTFont, command = btn_pilots,fg= "#FAFAFA",bg ="black") #Para ir a Pilots
 BtnPilots.place(x = 800, y = 100)
+
+BtnPilots = Button(MainCanv, text= "Modificar Patrocinadores",font = nnFont, command = modificarPatro,fg= "#FAFAFA",bg ="black") #para editar patrocinadores
+BtnPilots.place(x = 500, y = 670)
+
 Main.protocol("WM_DELETE_WINDOW", lambda : closeX(Main))
     
 Main.mainloop()
