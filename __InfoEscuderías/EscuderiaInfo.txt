@@ -1,10 +1,10 @@
 piloto1.png;Juanini;90;italiani;1950;pwm=0.dir=1.dir=1.zigzag.pwm=-710.zigzag;1;1;1;0;100.0;100.0
-piloto1.png;Budasd;098;kujh;2022;pwm=0.pwm=-941.dir=0.pwm=-946.pwm=805.zigzag;100;98;98;0;98.0;98.0
 piloto1.png;Budasd;098;kujh;2019;pwm=0.pwm=-941.dir=0.pwm=-946.pwm=805.zigzag;100;98;98;0;98.0;98.0
+piloto1.png;Budasd;098;kujh;2022;pwm=0.pwm=-941.dir=0.pwm=-946.pwm=805.zigzag;100;98;98;0;98.0;98.0
 piloto1.png;Alejadro Esquivel;23;Colombiano;2001;dir=1.pwm=1000.pwm=-100.dir=-1;30;25;25;1;86.21;86.21
 piloto1.png;Alejadro Esquivel;23;Colombiano;2001;dir=1.pwm=1000.pwm=-100.dir=-1;30;25;25;1;86.21;86.21
-piloto1.png;Rogelio Tinoco;22;Croata;2016;pipupupio;50;40;30;4;65.22;86.96
 piloto1.png;Skulinski Provodoski;22;Croata;2016;pipupupio;50;40;30;4;65.22;86.96
+piloto1.png;Rogelio Tinoco;22;Croata;2016;pipupupio;50;40;30;4;65.22;86.96
 piloto1.png;Juan Gabriel;34;Panameño;2000;dir=1.dir=0;60;40;20;1;33.9;67.8
 piloto1.png;oiu;2;oie;1022;pwm=0.zigzag.zigzag.zigzag.dir=0.dir=-1;12;9;3;0;25.0;75.0
 piloto1.png;Lukas Fernz;23;Aleman;2018;dir=1.pwm=1023.dir=-1.pwm=-900.zigzag;44;7;3;2;7.14;16.67
