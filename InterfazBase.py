@@ -303,14 +303,13 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestCanv.create_image(905,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
     
     #-----------------------------------------
-    TestCanv.create_text(120,70, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
-    TestCanv.create_text(120,100, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
-    TestCanv.create_text(120,130, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
-    TestCanv.create_text(600,70, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
-    TestCanv.create_text(600,100, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
-    TestCanv.create_text(600,130, text = "Escudería",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(120,70, text = "Escudería: Loui Vcker",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(120,100, text = ("Marca Auto: "+autos.info[carro][0]),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(120,130, text = ("Modelo Auto: "+autos.info[carro][1]),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(600,70, text = ("Piloto: " + pilotos.info[pilotoIndex][pilotos.iNOM]),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(600,100, text = ("Nacionalidad: "+ pilotos.info[pilotoIndex][pilotos.iPAIS]),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
+    TestCanv.create_text(600,130, text = ("Test Drive 1.0 - Loui Vcker Racing Team"),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
     #-----------------------------------------
-    TestCanv.create_text(600,15, text = (autos.info[carro][0] +autos.info[carro][1]) , font = ("Consolas",15),fill = "White",tags = "name")
     
     
     TestCanv.create_text(620,675, text = "PWM:0%", font= ("Algency FB",18,'bold italic'), fill = "black", tags = "pwm", anchor= NW)
@@ -348,8 +347,9 @@ def test_drive_window(pilotoIndex, parent=Main):
             Command = myCar.send("sense;")
             sleep(4);
             response = myCar.readById(Command)
-            dia_noche(response)
-            bateria(response)
+            if ActiveWindow:
+                dia_noche(response)
+                bateria(response)
             
         
     ThreadSense = Thread(target = check_sense)

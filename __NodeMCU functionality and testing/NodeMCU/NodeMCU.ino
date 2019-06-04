@@ -507,6 +507,7 @@ String getSense(){
   //int batteryLvl = round(((analogRead(A0) -682)/3.4));
   int Charge = analogRead(A0);
   int batteryLvl = map(Charge,530,1023,0,100);
+  batteryLvl = constrain(batteryLvl, 0, 100);
   
   //definimos light como una función que retornará un string más arriba, pero por motivos de mantener el código más cercano a lo esperado, se cambió.
   
