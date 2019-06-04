@@ -1,6 +1,6 @@
-Lexus;AEX51;Japón;carro1.png;2022;4;2;9V;Descargado;100w;blv:1, ldr:0;200kg;4.0
-Toyota;AE86;Japon;carroAE86.png;1986;4;6;3V;RETIRADO;100W;SENSORS;20KG;5.0
-Nissan;GTR;Japon;ruta;2019;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;14.0
-Nissan;GTR;Japon;ruta;2017;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;16.0
-Fondango;GTR;Japon;ruta;2010;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;19.0
-Nissan;GTR;Japon;ruta;2020;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;121.0
+Nissan;GTR;Japon;carrod3.png;2020;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;121.0
+Fondango;GTR;Japon;carrod1.png;2010;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;19.0
+Nissan;GTR;Japon;carrod1.png;2017;3;6;4V;disponible;200W;blv: 80, ldr: luz; 1kg;16.0
+Nissan;GTR;Japon;carrod2.png;2019;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;14.0
+Toyota;AE86;Japon;carrod3.png;1986;4;6;3V;RETIRADO;100W;SENSORS;20KG;5.0
+Lexus;AEX51;Japón;carrod1.png;2022;4;2;9V;Disponible;100w;blv:1, ldr:0;200kg;4.0

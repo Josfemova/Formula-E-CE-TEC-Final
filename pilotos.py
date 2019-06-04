@@ -3,18 +3,19 @@
 
 class main_Pilotos:
     #constantes de posicion de datos en la lista info
-    iNOM =0
-    iEDAD =1
-    iPAIS=2
-    iTEMPO=3
-    iMOV=4
-    iPARTICIPA=5
-    iPODIO=6
-    iVICTO=7
-    iABANDO=8
-    iREP = 9
-    iRGP = 10
-    iFOTO= 11
+    iFOTO= 0
+    iNOM =1
+    iEDAD =2
+    iPAIS=3
+    iTEMPO=4
+    iMOV=5
+    iPARTICIPA=6
+    iPODIO=7
+    iVICTO=8
+    iABANDO=9
+    iREP = 10
+    iRGP = 11
+    
     txtfile = "__InfoEscuderías\\EscuderiaInfo.txt"
     CURRENTORDER = "REP"
     
@@ -83,13 +84,13 @@ class main_Pilotos:
             participaciones += piloto[self.iPARTICIPA]
         self.IGE = victorias/participaciones
 
-    def agregarPiloto(self,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
-        nuevoDatos = [nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
+    def agregarPiloto(self,foto,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
+        nuevoDatos = [foto,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
         self.info.append(nuevoDatos)
         self.ordenar(self.CURRENTORDER)
             
-    def modificarPiloto(self, pos, nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
-        modDatos = [nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
+    def modificarPiloto(self, pos, foto,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos):
+        modDatos = [foto,nombre,edad,pais,temp,movimientos, participaciones, podio, victorias, abandonos]
         self.info.pop(pos)
         self.info.append(modDatos)
         self.ordenar(self.CURRENTORDER)
@@ -113,12 +114,15 @@ class main_Pilotos:
         self.refrescar()
         
         
-    def ordenar(self, param):
+    def ordenar(self, param, Desc = True):
         if type(param) is str:
             if param== "RGP" or param == "REP":
                 self.CURRENTORDER = param
                 self.actualizarArchivo()
-                self.info = self.ordenar_aux("", param)[::-1]
+                if Desc:
+                    self.info = self.ordenar_aux("", param)[::-1]
+                else:
+                    self.info = self.ordenar_aux("", param)
                 self.actualizarArchivo()
             else:
                 return "parametro no valido"

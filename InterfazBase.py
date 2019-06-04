@@ -129,10 +129,6 @@ def closeX(widgetObj,parent=''):
     widgetObj.destroy()
     if parent !='':
         parent.deiconify()
-    
-def btn_back(Window):
-    Window.destroy()
-    Main.deiconify()
 
 #    _____________
 #___/ventana about
@@ -150,7 +146,7 @@ def about_window():
     AboutCanv.create_image(1,1,image=FotoAle,anchor = NW)
     #Se define una función para el botón de atrás a la principal
         
-    BtnBack1 =  Button(AboutCanv, text= "Main",command =lambda: btn_back(About),fg = "cyan", bg= "black")
+    BtnBack1 =  Button(AboutCanv, text= "Main",command =lambda: closeX(About, Main),fg = "cyan", bg= "black")
     BtnBack1.place(x = 600, y = 500)
 
 #-----Se termina la venta about y se define la ventana de pruebas
@@ -171,17 +167,31 @@ def test_drive_window(pilotoIndex, parent=Main):
     if deEscuderia:
         if autos.info[carro][autos.iESTADO] == 'Disponible':
             pass
+        else:
+            messagebox.showinfo('Error','AUTO no se encuentra disponible')
+            return
     else:
         messagebox.showinfo('Error','AUTO no se encuentra disponible')
-        return
+        
 
     parent.withdraw()
     def closeTestDrive():
+        nonlocal carro
         nonlocal ActiveWindow
         ActiveWindow = False
-        sleep(1)
-        closeX(TestDrive)
-        parent.deiconify()
+        try:
+            Answer = (send("sense;",True).split(";"))[1]
+            battery = int(Answer[5:])
+            if battery < 10:
+                data = autos.info[carro]
+                data[autos.iESTADO]="Descargado"
+                data.insert(0, carro)
+                autos.modificarAuto(*tuple(data))
+        except:
+            print("error en lectura de bateria")
+
+
+        closeX(TestDrive, parent)
         myCar.stop()
             
     
@@ -260,7 +270,8 @@ def test_drive_window(pilotoIndex, parent=Main):
         if(len(Msg)>0 and Msg[-1] == ";"):
             response = myCar.send(Msg)
             if returnAns:
-                return response
+                sleep(4)
+                return myCar.readById(response)
     #--------------------
     def check_sense():
         while ActiveWindow:
@@ -636,8 +647,15 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestDrive.protocol("WM_DELETE_WINDOW", closeTestDrive)
     def ejecutarCelebracion():
         nonlocal celebracion
+        
         for x in celebracion:
             send(x)
+        send('pwm:0;')
+        send('dir:0;')
+        send('lf:0;')
+        send('lb:0;')
+        send('lr:0;')
+        send('ll:0')
         
 ############################################   
 ############################################
@@ -650,9 +668,11 @@ def test_drive_window(pilotoIndex, parent=Main):
 #-----Se termina la ventana de pruebas y se define la de los pilotos
 def pilots_window(parent = Main):
     global pilotos,autos, TTFont, nnFont
+    DscRGP, DscREP, DscEficiencia = (False,)*3
+    
     Pilots = Toplevel()
     Pilots.title("Pilots")
-    Pilots.minsize(width= 850, height= 720)
+    Pilots.minsize(width= 1000, height= 720)
     Pilots.resizable(width= NO, height= NO)
     
     uFont = ('Helvetica', 14, 'bold italic')
@@ -661,50 +681,85 @@ def pilots_window(parent = Main):
 
 
     
-    C_Pil= Canvas(Pilots,width=850,height=720,bd=0, highlightthickness=0, bg= uBG)
+    C_Pil= Canvas(Pilots,width=1000,height=720,bd=0, highlightthickness=0, bg= uBG)
     #C_Pil.place(relx=0.5,rely=0.5, anchor ='c')
     C_Pil.pack(expand=2, anchor='c', fill=Y)
     C_Pil.fondoPil = fondoPil = cargar_imagen("fondoHistorial.png")
-    C_Pil.create_image(-400,0, image =fondoPil, anchor = NW)
+    C_Pil.create_image(0,0, image =fondoPil, anchor = NW)
 
 
     elements = []
     def cargarPilotos(param):
         global pilotos
-        nonlocal elements
-        pilotos.ordenar(param)
+        nonlocal elements, DscRGP, DscREP
+        if param == 'RGP':
+            if DscRGP==False:
+                DscRGP = True
+                pilotos.ordenar(param,True)
+            else:
+                DscRGP = False
+                pilotos.ordenar(param,False)
+                
+        elif param == 'REP':
+            if DscREP==False:
+                DscREP = True
+                pilotos.ordenar(param,True)
+            else:
+                DscREP= False
+                pilotos.ordenar(param,False)
+        #----------------------------------------------        
         for x in elements:
             listBox.delete(x)
         elements = []
+        fotos=[]
+        C_Pil.fotoPil = []
         for i in range(0, len(pilotos.info)):
+            try:
+                fotos.insert(i,cargar_imagen(pilotos.info[i][pilotos.iFOTO]))
+                C_Pil.fotoPil.insert(i,fotos[i])
+            except Exception as e:
+                print(e)
             data = [i+1]+pilotos.info[i][pilotos.iNOM:pilotos.iMOV] + pilotos.info[i][pilotos.iPARTICIPA:]
             data = tuple(data)
-            elements.append(listBox.insert("", "end", values=data))
+            elements.append(listBox.insert("", "end", values=data,image = fotos[i]))
             
     elementsA = []
-    C_Pil.fotoprueba = ft = cargar_imagen("BackL.png")
     def cargarAutos():
         global autos
-        nonlocal elementsA
-        autos.ordenar()
+        nonlocal elementsA, DscEficiencia
+        if DscEficiencia:
+            autos.ordenar(False)
+            DscEficiencia = False
+        else:
+            autos.ordenar(True)
+            DscEficiencia = True
+        #---------------------------------------------
         for x in elementsA:
             listBoxAut.delete(x)
         elementsA= []
+        fotos=[]
+        C_Pil.fotoAutos=[]
         for i in range(0, len(autos.info)):
+            try:
+                fotos.insert(i,cargar_imagen(autos.info[i][autos.iFOTO]))
+                C_Pil.fotoAutos.insert(i,fotos[i])
+            except Exception as e:
+                print(e)
             data = autos.info[i][:autos.iFOTO] + autos.info[i][autos.iTEMPO:]
             data = tuple(data)
-            elementsA.append(listBoxAut.insert("", "end", values=data,image = ft))
+            elementsA.append(listBoxAut.insert("", "end", values=data,image = fotos[i]))
 
     #Organizacion del TreeView de Pilotos
     txtBG = 'black'
     labelPil = Label(C_Pil, text="Pilotos",bg=txtBG,fg = uBG, font=TTFont).grid(row=0, columnspan=3)
     cols = ('Pos','Nombre Completo',"Edad","Nacionalidad","Tempo","Eventos","Podio","Victorias","Abandonos","REP","RGP")
-    listBox = ttk.Treeview(C_Pil,columns=cols, show='headings',height = 3)
+    listBox = ttk.Treeview(C_Pil,columns=cols,height = 3)
     for col in cols:
         listBox.heading(col, text=col)
     listBox.heading('REP', command =lambda : cargarPilotos("REP"))
     listBox.heading('RGP', command =lambda : cargarPilotos("RGP"))
-
+    
+    listBox.column('#0', width = 150, anchor = 'c')
     listBox.column(cols[0], width = 30, anchor = 'c')
     listBox.column(cols[1], width = 120, anchor = 'c')
     listBox.column(cols[2], width = 40, anchor = 'c')
@@ -713,21 +768,22 @@ def pilots_window(parent = Main):
         listBox.column(cols[i], width = 80, anchor = 'c')
     listBox.grid(row=1, column=0, columnspan=2)
 
+
     #Organización del TreeView de Autos
-    
     style = ttk.Style(C_Pil)
     style.configure('Treeview', rowheight=70)
-    #style.layout("listBoxAut", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})])
-    #style.layout("TreeView",[('mystyle.Treeview.treearea',{'sticky': 'nswe'})])
 
     labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
     colsAut = ('Marca','Modelo','Origen','Temporada','Baterias','CPB','VoltPB','Estado','Consumo','sensores','Peso','Eficiencia')
-    listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 3)#, show='headings')
+    listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 3)
     for col in colsAut:
         listBoxAut.heading(col, text=col)
+    listBoxAut.heading('Eficiencia', command =lambda : cargarAutos())
+
     for i in range(0, len(colsAut)):
         listBoxAut.column(colsAut[i], width =70, anchor ='c')
-    listBoxAut.column('#0', width = 70)
+        
+    listBoxAut.column('#0', width = 150, anchor = 'c')
     listBoxAut.column(colsAut[5], width = 30, anchor = 'c')
     listBoxAut.column(colsAut[6], width = 30, anchor = 'c')
 
@@ -757,6 +813,11 @@ def pilots_window(parent = Main):
             entryText=Entry(CAP,width=30, justify = CENTER)
             entryText.place(x=120, y=(20*i)+20)
             hojaTec.append(entryText)
+
+        Label(CAP, text = 'Ruta de foto').place(x=5,y=(20*(len(cols)-2))+20)
+        entryText=Entry(CAP,width=30, justify = CENTER)
+        entryText.place(x=120, y=(20*(len(cols)-2)+20))
+        hojaTec.insert(0, entryText)
         
         def enviar():
             global pilotos
@@ -792,7 +853,7 @@ def pilots_window(parent = Main):
                         i= len(newData)
                         print(newData)
                         print("error")
-            newData.insert(pilotos.iMov, createCeleb())
+            newData.insert(pilotos.iMOV, createCeleb())
             tuple(newData)
             pilotos.agregarPiloto(*newData)
             closeAP()
@@ -830,7 +891,15 @@ def pilots_window(parent = Main):
             entryText.place(x=120, y=(20*i)+20)
             entryText.insert(0,piloto[i])
             hojaTec.append(entryText)
+            
+        
         pos = int(piloto[0])-1
+        Label(CAP, text = 'Ruta de foto').place(x=5,y=(20*(len(cols)-2))+20)
+        entryText=Entry(CAP,width=30, justify = CENTER)
+        entryText.place(x=120, y=(20*(len(cols)-2)+20))
+        entryText.insert(0,pilotos.info[pos][pilotos.iFOTO])
+        hojaTec.insert(0, entryText)
+        
             
         def enviar():
             global pilotos
@@ -841,7 +910,7 @@ def pilots_window(parent = Main):
             newData.insert(pilotos.iMOV,pilotos.info[pos][pilotos.iMOV])                    
             newData.insert(0,pos)
             for i in range(0, len(newData)):
-                if i!= 1 and i!= 3 and i!=5:
+                if i!=1 and i!= 2 and i!= 4 and i!=6:
                     try:
                         float(newData[i])
                     except:
@@ -975,9 +1044,6 @@ def pilots_window(parent = Main):
         TkFoto.protocol("WM_DELETE_WINDOW", lambda : TkFoto.destroy())
         
 
-
-
-
     Btn_modificar = Button(C_Pil, text = "modificar información",font=nnFont, width = 25,bg=txtBG,fg = uBG,
                            command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =1)
     
@@ -994,9 +1060,9 @@ def pilots_window(parent = Main):
     
     Btn_agregarA = Button(C_Pil, text="agregar auto",font=nnFont, width=25,bg=txtBG,fg = uBG,
                           command=lambda: agregarAuto()).grid(row = 6, column = 0 )
-    
-    Btn_VerFoto = Button(C_Pil, text="Ver foto",font=nnFont, width=25,bg=txtBG,fg = uBG,
-                         command=lambda: verFoto(listBoxAut.index(listBoxAut.selection()))).grid(row=7, columnspan = 3 )
+##    
+##    Btn_VerFoto = Button(C_Pil, text="Ver foto",font=nnFont, width=25,bg=txtBG,fg = uBG,
+##                         command=lambda: verFoto(listBoxAut.index(listBoxAut.selection()))).grid(row=7, columnspan = 3 )
 
     cargarPilotos(pilotos.CURRENTORDER)
     cargarAutos()
@@ -1009,9 +1075,6 @@ def pilots_window(parent = Main):
 #------Comandos de los Botones en Main------
 BtnAbout= Button(MainCanv, text= "Informacion",font = TTFont, command = btn_about,fg= "#FAFAFA",bg ="black") #Para ir a About
 BtnAbout.place(x = 100,y = 100)
-
-BtnTest= Button(MainCanv, text= "Test Drive", font = TTFont,command = btn_test,fg= "#FAFAFA",bg ="black")  #Para ir a TestDrive
-BtnTest.place(x = 400, y = 100)
 
 BtnPilots = Button(MainCanv, text= "Pilotos",font = TTFont, command = btn_pilots,fg= "#FAFAFA",bg ="black") #Para ir a Pilots
 BtnPilots.place(x = 800, y = 100)

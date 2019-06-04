@@ -65,8 +65,13 @@ class main_Autos:
         txtAuto.close()
         self.refrescar()
         
-    def ordenar(self):
-        self.info = self.ordenar_aux("")
+    def ordenar(self, Dsc = True):
+        if Dsc:
+            self.info = self.ordenar_aux("")[::-1]
+        else:
+            self.info = self.ordenar_aux("")
+            
+        
         self.actualizarArchivo()
 
     def ordenar_aux(self, matriz = ""):
