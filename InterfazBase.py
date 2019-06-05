@@ -94,6 +94,12 @@ nnFont = ('Helvetica', 15, 'bold italic')
 
 
 def cargar_imagen(Nombre):
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     ruta = os.path.join("__Interfaz\\imagenes",Nombre)
     Imagen = PhotoImage(file = ruta)
     return Imagen
@@ -131,6 +137,12 @@ logoref=''
 
 newImagen= []
 def recargaInfo():
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     global newImagen,logoimg,Logo,logoref,EstadoCarro,MainCarro
     newImagen = []
     txtpatro = open("__InfoEscuderías\\patrocinadores.txt")
@@ -154,6 +166,12 @@ def recargaInfo():
     
     
 def modificarPatro():
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     modPil = Toplevel()
     modPil.geometry('700x150')
     modPil.title('Patrocinadores')
@@ -182,6 +200,12 @@ def modificarPatro():
     Btn.grid(row = 2, column=1)
     
 def modificarLogo():
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     modLog = Toplevel()
     modLog.geometry('700x150')
     modLog.title('Logos')
@@ -235,6 +259,12 @@ def closeX(widgetObj,parent=''):
 #    _____________
 #___/ventana about
 def about_window():
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     About = Toplevel()
     About.title("About")
     About.minsize(800,600)
@@ -251,8 +281,38 @@ def about_window():
     BtnBack1 =  Button(AboutCanv, text= "Main",command =lambda: closeX(About, Main),fg = "cyan", bg= "black")
     BtnBack1.place(x = 600, y = 500)
 
+
+
+
+
+
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+
+
+
+
+#_______________________________________________________       Sección de Ventana de Test Drive              ________________________________________________________________
+
+
+
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+    
 #-----Se termina la venta about y se define la ventana de pruebas
 def test_drive_window(pilotoIndex, parent=Main):
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     #Valor inicial de las variables globales para esta ventana
     celebracion = pilotos.getCelebracion(pilotoIndex)
     
@@ -276,6 +336,12 @@ def test_drive_window(pilotoIndex, parent=Main):
     
     parent.withdraw()
     def closeTestDrive():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal carro
         nonlocal ActiveWindow
         ActiveWindow = False
@@ -373,6 +439,12 @@ def test_drive_window(pilotoIndex, parent=Main):
         TestCanv.create_image((691+i*57), 580, image = GrON, tag =('Green'+str(i), 'greenAcc'), state = HIDDEN)
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
     def gradualOff(light):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal cntGreen, cntRed,SPressed, WPressed, Speed,ActiveWindow
         if light == 'GR':
             cntGreen = 0
@@ -391,6 +463,12 @@ def test_drive_window(pilotoIndex, parent=Main):
                 
     cntGreen = 0
     def gradualAccGreen():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal WPressed,cntGreen
         while WPressed:
             cntGreen+=1
@@ -407,6 +485,12 @@ def test_drive_window(pilotoIndex, parent=Main):
 
     cntRed = 0
     def gradualAccRed():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal SPressed,cntRed
         while SPressed:
             cntRed+=1
@@ -440,6 +524,10 @@ def test_drive_window(pilotoIndex, parent=Main):
         """
         Función send para enviar comandos al Node
         Esta funcion es una modificación a la dada en el archivo TelemetryLog por Santiago Gamboa (Asistente del Curso)
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
         """
         if(len(Msg)>0 and Msg[-1] == ";"):
             response = myCar.send(Msg)
@@ -448,6 +536,12 @@ def test_drive_window(pilotoIndex, parent=Main):
                 return myCar.readById(response)
     #-----------------------------------------
     def check_sense():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         while ActiveWindow:
             Command = myCar.send("sense;")
             sleep(4);
@@ -461,6 +555,12 @@ def test_drive_window(pilotoIndex, parent=Main):
     ThreadSense.start()
 
     def dia_noche(Answer):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         #Validar la posición del caracter en el que la LDR manda la variable light
         
         if Answer[-3] == "0":
@@ -473,8 +573,12 @@ def test_drive_window(pilotoIndex, parent=Main):
             return
 
     def bateria(Answer):
-        #print("entered")
-        #nonlocal Battery
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         if len(Answer) == 14:
             Battery = Answer[5]
             TestCanv.itemconfig("battext", text =(Battery) + "%")
@@ -490,6 +594,10 @@ def test_drive_window(pilotoIndex, parent=Main):
     def WASD_Press(event):
         """
         Función que controla los eventos que se activarán al presionar teclas definidas
+
+        Entradas:
+        Salidas:
+        Restricciones:
         """
         nonlocal WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, BlinkZ, BlinkC
 
@@ -577,6 +685,10 @@ def test_drive_window(pilotoIndex, parent=Main):
     def gradual_front():
         """
         Función que es invocada por el hilo de aceleración para generar un avance gradual
+        
+        Entradas:
+        Salidas:
+        Restricciones:
         """
         nonlocal Speed, Moving, WPressed, SPressed, SentBackOFF,SentBackON
         WPressed = True
@@ -627,6 +739,10 @@ def test_drive_window(pilotoIndex, parent=Main):
     def gradual_back():
         """
         Función que es invocada por el hilo de desaceleración/reversa para generar un movimiento gradual hacia atrás.
+
+        Entradas:
+        Salidas:
+        Restricciones:
         """
         nonlocal Speed,Moving, SPressed, WPressed
         SPressed = True
@@ -657,6 +773,7 @@ def test_drive_window(pilotoIndex, parent=Main):
         
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #-------------------------------------------
+        
     def thread_blink(Direction):
         """
         Función que recibe la dirección a la que se desea activar el hilo de parpadeo para las direccionales.
@@ -673,6 +790,7 @@ def test_drive_window(pilotoIndex, parent=Main):
         else:
             return
     #--------------------
+        
     def blink_lights(Direction, Counter):
         nonlocal ZPressed, CPressed, XPressed, BlinkC, BlinkZ
         if Direction == "L":
@@ -759,6 +877,12 @@ def test_drive_window(pilotoIndex, parent=Main):
             FPressed = False
 
     def back_light_control_release():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal SPressed, SentBackON, SentBackOFF, Speed, WPressed
         #print(SPressed)
         while not SPressed and ActiveWindow:
@@ -783,6 +907,12 @@ def test_drive_window(pilotoIndex, parent=Main):
         #print("S was pressed and exit release while")
 
     def ejecutarCelebracion():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal celebracion
         for x in celebracion:
             send(x)
@@ -813,7 +943,7 @@ def test_drive_window(pilotoIndex, parent=Main):
     
 ##    def cooords(event):
 ##        print('x',event.x,'y',event.y)
-##    TestDrive.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
+##    TestDrive.bind("<Button-1>",cooords)
 ##    
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
     TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
@@ -821,18 +951,38 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestDrive.protocol("WM_DELETE_WINDOW", closeTestDrive)
 
             
+#############################################################################################################################################################################
     
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+
+
+
+
+
+#__________________________________________               Sección de la tabla de posiciones            _____________________________________________________________________
+
+
+
+
+
         
-############################################   
-############################################
-            ############################################
-            ############################################
-            ############################################
-            ############################################
-            ############################################
-            ############################################
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+
+
 #-----Se termina la ventana de pruebas y se define la de los pilotos
 def pilots_window(parent = Main):
+    """
+    Entradas:
+    Salidas:
+    Restricciones:
+    Funcionamiento:
+    """
     global pilotos,autos, TTFont, nnFont
     DscRGP, DscREP, DscEficiencia = (False,)*3
     
@@ -861,6 +1011,12 @@ def pilots_window(parent = Main):
 
     elements = []
     def cargarPilotos(param):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         global pilotos
         nonlocal elements, DscRGP, DscREP
         if param == 'RGP':
@@ -896,6 +1052,12 @@ def pilots_window(parent = Main):
             
     elementsA = []
     def cargarAutos():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         global autos
         nonlocal elementsA, DscEficiencia
         if DscEficiencia:
@@ -951,7 +1113,7 @@ def pilots_window(parent = Main):
     Frame(C_Pil, height = 20).grid(row=4, columnspan =4)
     C_Pil.create_text(550, 565, text = 'Autos', fill = txtBG, font = TTFont, anchor = NW)
     #labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
-    colsAut = ('Marca','Modelo','Origen','Temporada','Baterias','CPB','VoltPB','Estado','Consumo','sensores','Peso','Eficiencia')
+    colsAut = ('Marca','Modelo','Origen','Tempo','Baterias','CPB','VoltPB','Estado','Consumo','Sensores','Peso','Eficiencia')
     listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 5)
     for col in colsAut:
         listBoxAut.heading(col, text=col)
@@ -961,6 +1123,9 @@ def pilots_window(parent = Main):
     listBoxAut.column('#0', width = 150, anchor = 'c')
     listBoxAut.column(colsAut[5], width = 50, anchor = 'c')
     listBoxAut.column(colsAut[6], width = 50, anchor = 'c')
+    listBoxAut.column('Sensores', width = 110, anchor = 'c')
+    listBoxAut.column('Estado', width = 100, anchor = 'c')
+    
     listBoxAut.grid(row=5, column=1, columnspan=2)
     #-------------------------------------------------------------------------
 
@@ -970,6 +1135,12 @@ def pilots_window(parent = Main):
 
 
     def agregarPiloto(parent = Pilots):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal cols
         parent.withdraw()
         AP=Toplevel()
@@ -1043,6 +1214,12 @@ def pilots_window(parent = Main):
 
 
     def modificarPiloto(piloto, parent = Pilots):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         if piloto == []:
             return
         nonlocal cols
@@ -1104,6 +1281,12 @@ def pilots_window(parent = Main):
 
 
     def agregarAuto(parent = Pilots):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         nonlocal colsAut
         parent.withdraw()
         Aa=Toplevel()
@@ -1154,6 +1337,12 @@ def pilots_window(parent = Main):
         
 
     def modificarAuto(Auto,pos, parent = Pilots):
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcionamiento:
+        """
         if Auto == []:
             return
         nonlocal colsAut
@@ -1203,24 +1392,6 @@ def pilots_window(parent = Main):
             
         Btn_cerrar = Button(CAP, width=25,text="Cerrar",command=closeAP).place(x = 10, y=5)
         Btn_agregar = Button(CAP, width=25,text="Guardar",command=enviar).place(x = 10, y = 300)
-
-    def verFoto(indAuto):
-        global autos
-        TkFoto = Toplevel()
-        TkFoto.title("Foto")
-        TkFoto.minsize(600,400)
-        TkFoto.resizable(width=NO,height=NO)
-        CAP = Canvas(TkFoto, width = 600, height = 400)
-        CAP.place(x=0, y=0, anchor =NW)
-        try:
-            foto = cargar_imagen(autos.info[indAuto][autos.iFOTO])
-        except:
-            messagebox.showinfo('Error','ruta de imagen no valida')
-            TkFoto.destroy()
-            return
-        CAP.create_image(0,0, image=foto, anchor = NW)
-        CAP.fotoAuto = foto
-        TkFoto.protocol("WM_DELETE_WINDOW", lambda : TkFoto.destroy())
         
 
     Btn_modificar = Button(C_Pil, text = "modificar información",font=nnFont, width = 25,bg=uBG,fg = txtBG,bd=0,
@@ -1247,6 +1418,16 @@ def pilots_window(parent = Main):
     cargarAutos()
 
     Pilots.protocol("WM_DELETE_WINDOW", lambda : closeX(Pilots, Main))
+
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+    
+#############################################################################################################################################################################
+
+
+
+
 
 
     
