@@ -367,7 +367,11 @@ def test_drive_window(pilotoIndex, parent=Main):
         nonlocal ActiveWindow
         ActiveWindow = False
         sleep(0.2)
-        closeX(TestDrive, parent)
+        parent.withdraw()
+        mensaje = Toplevel(TestDrive)
+        mensaje.title('Espere')
+        mensaje.geometry('200x100')
+        Label(mensaje, text = 'Espere, \n actualizando datos', font = nnFont).pack()
         def getBat():
             try:
                 response = (send("sense;",True))
@@ -380,10 +384,15 @@ def test_drive_window(pilotoIndex, parent=Main):
                     data[autos.iSENSORES] = response.split(';')[0]+","+response.split(';')[1]    
                     data.insert(0, carro)
                     autos.modificarAuto(*tuple(data))
+                    
             except:
                 print("error en lectura de bateria")
+            mensaje.destroy()
+            closeX(TestDrive, parent)
             myCar.stop()
-        Thread(target = getBat, args = ()).start()
+        Thread(target=getBat).start()
+        
+        
             
     Speed = 0
     Moving,WPressed,APressed,SPressed,DPressed,ZPressed,XPressed,CPressed,FPressed,BlinkZ,BlinkC,SentBackON,SentBackOFF = (False,)*13
@@ -1449,7 +1458,6 @@ def pilots_window(parent = Main):
     def refresh(event):
         cargarPilotos(pilotos.CURRENTORDER)
         cargarAutos()
-        print('w')
         
     listBoxAut.bind("<Map>", refresh)
     Pilots.protocol("WM_DELETE_WINDOW", lambda : closeX(Pilots, Main))

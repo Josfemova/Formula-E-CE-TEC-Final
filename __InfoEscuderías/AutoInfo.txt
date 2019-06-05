@@ -1,7 +1,7 @@
-Ferrari;SF90;Italia;Ferrari-SF90.png;2020;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;121.0
-McLaren;MCL34;Inglaterra;McLaren_MCL34.png;2016;3;6;4V;Disponible;200W;blv: 80, ldr:1; 1kg;19.0
-Nissan;GTR 32;Japon;carrod1.png;2017;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;16.0
-Nissan;GTR 64;Japon;carrod2.png;2018;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;14.0
-Toyota;AE86;Japon;carrod3.png;1986;4;6;3V;RETIRADO;100W;SENSORS;20KG;5.0
-BMW;iFE18;Aleman;BMW_iFE18.png;2019;4;2;9V;Disponible;100w;blv:1, ldr:0;200kg;4.0
 Spark;STR05E;EE.UU;Spark_STR05E.png;2015;4;2;4;Descargado;100W;blvl:100,ldr:0;20kg;1.0
+BMW;iFE18;Aleman;BMW_iFE18.png;2019;4;2;9V;Disponible;100w;blv:1, ldr:0;200kg;4.0
+Toyota;AE86;Japon;carrod3.png;1986;4;6;3V;RETIRADO;100W;SENSORS;20KG;5.0
+Nissan;GTR 64;Japon;carrod2.png;2018;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;14.0
+Nissan;GTR 32;Japon;carrod1.png;2017;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;16.0
+McLaren;MCL34;Inglaterra;McLaren_MCL34.png;2016;3;6;4V;Disponible;200W;blv: 80, ldr:1; 1kg;19.0
+Ferrari;SF90;Italia;Ferrari-SF90.png;2020;3;6;4V;Disponible;200W;blv: 80, ldr: luz; 1kg;121.0
