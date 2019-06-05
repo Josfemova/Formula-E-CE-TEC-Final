@@ -283,14 +283,16 @@ def test_drive_window(pilotoIndex, parent=Main):
         closeX(TestDrive, parent)
         def getBat():
             try:
-                Answer = (send("sense;",True).split(";"))[0]
+                response = (send("sense;",True))
+                Answer = (response.split(';'))[0]
                 if "blvl:" in Answer:
                     battery = int(Answer[5:])
+                    data = autos.info[carro]
                     if battery < 10:
-                        data = autos.info[carro]
                         data[autos.iESTADO]="Descargado"
-                        data.insert(0, carro)
-                        autos.modificarAuto(*tuple(data))
+                    data[autos.iSENSORES] = response    
+                    data.insert(0, carro)
+                    autos.modificarAuto(*tuple(data))
             except:
                 print("error en lectura de bateria")
             myCar.stop()
@@ -371,20 +373,21 @@ def test_drive_window(pilotoIndex, parent=Main):
         TestCanv.create_image((691+i*57), 580, image = GrON, tag =('Green'+str(i), 'greenAcc'), state = HIDDEN)
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
     def gradualOff(light):
-        nonlocal cntGreen, cntRed,SPressed, WPressed, Speed
+        nonlocal cntGreen, cntRed,SPressed, WPressed, Speed,ActiveWindow
         if light == 'GR':
             cntGreen = 0
             light = 'Green'
         elif light == 'RE':
             cntRed = 0
             light = 'Red'
-            
+   
         for i in range(0, 3):
             if not (SPressed or WPressed) and Speed!=0:
                 sleep(1.7)
             else:
                 sleep(0.07)
-            TestCanv.itemconfig((light+str(2-i)), state = HIDDEN)
+            if ActiveWindow:
+                TestCanv.itemconfig((light+str(2-i)), state = HIDDEN)
                 
     cntGreen = 0
     def gradualAccGreen():
