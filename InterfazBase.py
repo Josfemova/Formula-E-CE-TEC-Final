@@ -115,23 +115,15 @@ Main.resizable(width=NO,height=NO)
 #___/Canvas para trabajar la ventana
 MainCanv = Canvas(Main,width=1280,height=720,bg="grey")
 MainCanv.place(x=0,y=0)
-
 MainBG = cargar_imagen("MainFondo.png")
 MainCanv.create_image(0,0,image= MainBG, anchor = NW)
 IGE = MainCanv.create_text(940, 35, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)), font = TTFont, fill = '#FAFAFA')
 NombreEscud = MainCanv.create_text(290, 35, text = "Loui Vcker - Costa Rica - 2019", font = TTFont, fill = '#FAFAFA')
 MainCarro = 2019
-
-EstadoCarro = MainCanv.create_text(640, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA', anchor = CENTER)
-def cooords(event):
-        print('x',event.x,'y',event.y)
-MainCanv.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
-    
-
+EstadoCarro = MainCanv.create_text(640, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA', anchor = CENTER)  
 Logo = MainCanv.create_image(620, 200, image = MainBG)
-logoimg ='logo2.PNG'
+logoimg =''
 logoref=''
-
 
 
 
