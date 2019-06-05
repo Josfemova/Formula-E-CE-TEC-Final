@@ -112,8 +112,8 @@ MainCanv.place(x=0,y=0)
 
 MainBG = cargar_imagen("MainFondo.png")
 MainCanv.create_image(0,0,image= MainBG, anchor = NW)
-IGE = MainCanv.create_text(890, 35, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)), font = TTFont, fill = '#FAFAFA')
-NombreEscud = MainCanv.create_text(200, 35, text = "Loui Vcker 2019", font = TTFont, fill = '#FAFAFA')
+IGE = MainCanv.create_text(940, 35, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)), font = TTFont, fill = '#FAFAFA')
+NombreEscud = MainCanv.create_text(290, 35, text = "Loui Vcker - Costa Rica - 2019", font = TTFont, fill = '#FAFAFA')
 MainCarro = 2019
 
 EstadoCarro = MainCanv.create_text(640, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA', anchor = CENTER)
@@ -364,12 +364,61 @@ def test_drive_window(pilotoIndex, parent=Main):
     
     for i in range(0,3):
         #460, 590
-        TestCanv.create_image((520+i*57), 580, image = ReON, tag =('Red'+str(i), 'redAcc'), state = HIDDEN)
+        TestCanv.create_image((520+i*57), 580, image = ReON, tag =('Red'+str(2-i), 'redAcc'), state = HIDDEN)
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
     for i in range(0,3):
         #460, 590
         TestCanv.create_image((691+i*57), 580, image = GrON, tag =('Green'+str(i), 'greenAcc'), state = HIDDEN)
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
+    def gradualOff(light):
+        nonlocal cntGreen, cntRed,SPressed, WPressed, Speed
+        if light == 'GR':
+            cntGreen = 0
+            light = 'Green'
+        elif light == 'RE':
+            cntRed = 0
+            light = 'Red'
+            
+        for i in range(0, 3):
+            if not (SPressed or WPressed) and Speed!=0:
+                sleep(1.7)
+            else:
+                sleep(0.07)
+            TestCanv.itemconfig((light+str(2-i)), state = HIDDEN)
+                
+    cntGreen = 0
+    def gradualAccGreen():
+        nonlocal WPressed,cntGreen
+        while WPressed:
+            cntGreen+=1
+            sleep(0.004)
+            if cntGreen == 100:
+                TestCanv.itemconfig(('Green0'), state = NORMAL)
+            elif cntGreen == 200:
+                TestCanv.itemconfig(('Green0'), state = NORMAL)
+                TestCanv.itemconfig(('Green1'), state = NORMAL)
+            elif cntGreen == 300:
+                TestCanv.itemconfig(('Green0'), state = NORMAL)
+                TestCanv.itemconfig(('Green1'), state = NORMAL)
+                TestCanv.itemconfig(('Green2'), state = NORMAL)
+
+    cntRed = 0
+    def gradualAccRed():
+        nonlocal SPressed,cntRed
+        while SPressed:
+            cntRed+=1
+            sleep(0.004)
+            if cntRed == 100:
+                TestCanv.itemconfig(('Red0'), state = NORMAL)
+            elif cntRed == 200:
+                TestCanv.itemconfig(('Red0'), state = NORMAL)
+                TestCanv.itemconfig(('Red1'), state = NORMAL)
+            elif cntRed == 300:
+                TestCanv.itemconfig(('Red0'), state = NORMAL)
+                TestCanv.itemconfig(('Red1'), state = NORMAL)   
+                TestCanv.itemconfig(('Red2'), state = NORMAL)
+            
+            
 
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -440,6 +489,7 @@ def test_drive_window(pilotoIndex, parent=Main):
         Función que controla los eventos que se activarán al presionar teclas definidas
         """
         nonlocal WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, BlinkZ, BlinkC
+
         Key = event.char
         if Key == "w":
             if not WPressed and not SPressed:
@@ -447,6 +497,7 @@ def test_drive_window(pilotoIndex, parent=Main):
                 ThreadForwards = Thread(target = gradual_front)
                 sleep(0.2)
                 ThreadForwards.start()
+                Thread(target=gradualAccGreen, args=()).start()
                 #Hilo que controla la aceleración delantera del carro.
             else:
                 return #do nothing
@@ -458,6 +509,7 @@ def test_drive_window(pilotoIndex, parent=Main):
                 sleep(0.3)
                 ThreadBacklightsP = Thread(target = back_light_control_press)
                 ThreadBacklightsP.start()
+                Thread(target=gradualAccRed, args=()).start()
             else:
                 return
         elif Key == "a":
@@ -680,10 +732,12 @@ def test_drive_window(pilotoIndex, parent=Main):
         #print(Key)
         if Key == "w":
             WPressed = False
+            Thread(target=gradualOff,args = ('GR',)).start()
         elif Key == "s":
             SPressed = False
             ThreadBacklightsR = Thread(target = back_light_control_release)
             ThreadBacklightsR.start()
+            Thread(target=gradualOff,args = ('RE',)).start()
         elif Key == "a":
             APressed = False
             send("dir:0;")
@@ -754,10 +808,10 @@ def test_drive_window(pilotoIndex, parent=Main):
     Button(TestDrive, text="Cerrar \n Test Drive",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =3,
            command=lambda: closeTestDrive()).place(x=1125,y=600, anchor = CENTER)
     
-    def cooords(event):
-        print('x',event.x,'y',event.y)
-    TestDrive.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
-    
+##    def cooords(event):
+##        print('x',event.x,'y',event.y)
+##    TestDrive.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
+##    
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
     TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
     
