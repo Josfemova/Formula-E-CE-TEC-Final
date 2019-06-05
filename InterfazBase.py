@@ -118,8 +118,7 @@ MainCarro = 2019
 
 EstadoCarro = MainCanv.create_text(640, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA', anchor = CENTER)
 def cooords(event):
-        print(event.x)
-        print(event.y)
+        print('x',event.x,'y',event.y)
 MainCanv.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
     
 
@@ -339,6 +338,11 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestDrive.bl = BackLight= cargar_imagen("BackL.png")
     TestCanv.create_image(855,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
     TestCanv.create_image(905,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
+
+    TestDrive.revON = revON= cargar_imagen("Reversa.png")
+    TestDrive.revOff = revOff= cargar_imagen("ReversaOff.png")
+    TestCanv.create_image(925,600, image = revOff)
+    TestCanv.create_image(925,600, image = revON, tags = ("lights", "back"), state = HIDDEN)
     
     #-----------------------------------------
     TestCanv.create_text(120,70, text = "Escudería: Loui Vcker",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
@@ -352,10 +356,21 @@ def test_drive_window(pilotoIndex, parent=Main):
     
     TestCanv.create_text(620,675, text = "PWM:0%", font= ("Algency FB",18,'bold italic'), fill = "black", tags = "pwm", anchor= NW)
     TestCanv.create_text(220,190, text = "%", font = ("Algency FB",18,'bold italic'), fill = "black", tags = "battext", anchor = NW)
-
+    TestCanv.AOff = AOff = cargar_imagen('AOff.png')
+    TestCanv.GrON = GrON = cargar_imagen('GrON.png')
+    TestCanv.ReON = ReON = cargar_imagen('ReOn.png')
+    for i in range(0, 6):
+        TestCanv.create_image((520+i*57), 580, image = AOff)
     
-
+    for i in range(0,3):
+        #460, 590
+        TestCanv.create_image((520+i*57), 580, image = ReON, tag =('Red'+str(i), 'redAcc'), state = HIDDEN)
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
+    for i in range(0,3):
+        #460, 590
+        TestCanv.create_image((691+i*57), 580, image = GrON, tag =('Green'+str(i), 'greenAcc'), state = HIDDEN)
+        #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
+
 
     #Se utiliza el comando del botón atrás para volver a main
     #Para ello se define una función al igual que en la ventana About
@@ -500,11 +515,6 @@ def test_drive_window(pilotoIndex, parent=Main):
                     TestCanv.itemconfig("front",state = HIDDEN)
             else:
                 return
-        elif Key =="j":
-            
-            return
-        elif key == "k":
-            return
         else:
             return #cuando suceda un evento pero no coincida con las teclas determinadas en este módulo
         #--------------------------------------
@@ -539,7 +549,7 @@ def test_drive_window(pilotoIndex, parent=Main):
                         TestCanv.itemconfig("back", state = HIDDEN)
                 Speed += 100
                 TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
-                sleep(1)
+                sleep(0.2)
                 
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #la función entra a este while cuando salga del primero, que es mayor a 500.
@@ -570,12 +580,12 @@ def test_drive_window(pilotoIndex, parent=Main):
                 Speed -= 23
                 send("pwm:" + str(Speed) + ";")
                 TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
-                sleep(0.3)
+                sleep(0.01)
             elif Speed >= 500:
                 send("pwm:" + str(Speed) + ";")
                 Speed -= 100
                 TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
-                sleep(0.1)
+                sleep(0.3)
             else:
                 Speed -= 100
                 send("pwm:" + str(Speed) + ";")
@@ -588,7 +598,7 @@ def test_drive_window(pilotoIndex, parent=Main):
             send("pwm:" + str(Speed) + ";")
             TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
             #print("sent to move backwards by " + str(Speed))
-            sleep(0.5)
+            sleep(0.4)
         
         TestCanv.itemconfig("pwm", text = "PWM:" + str(Speed))
         #-------------------------------------------
@@ -745,8 +755,7 @@ def test_drive_window(pilotoIndex, parent=Main):
            command=lambda: closeTestDrive()).place(x=1125,y=600, anchor = CENTER)
     
     def cooords(event):
-        print(event.x)
-        print(event.y)
+        print('x',event.x,'y',event.y)
     TestDrive.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
     
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
