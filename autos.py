@@ -128,7 +128,7 @@ class main_Autos:
         Entradas: self, Dsc  - Si la salida debe ser ascendente o descendente
         Salidas: --------------
         Restricciones: Dsc debe ser True o False
-        Funcionamiento: Llama al auxiliar, y retorna la matriz ordenada de forma descendente o ascendente basado en Dsc
+        Funcionamiento: Llama al auxiliar, y retorna la matriz de autos ordenada de forma descendente o ascendente basado en Dsc
         Actualiza el archivo según este nuevo orden
         """
         if Dsc:
