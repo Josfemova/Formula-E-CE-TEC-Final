@@ -661,10 +661,10 @@ void frenar(){
   }
 void directo(){
   //rectifica y detiene el motor de direccion
-  analogWrite(EnB,1023);
-  digitalWrite(In3,0);
-  digitalWrite(In4,0);
-  delay(50);
+//  analogWrite(EnB,1023);
+//  digitalWrite(In3,0);
+//  digitalWrite(In4,0);
+//  delay(50);
   analogWrite(EnB,0);
   }
 void girarDerecha(int x){

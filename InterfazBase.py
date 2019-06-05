@@ -975,7 +975,7 @@ def test_drive_window(pilotoIndex, parent=Main):
 ##    def cooords(event):
 ##        print('x',event.x,'y',event.y)
 ##    TestDrive.bind("<Button-1>",cooords)
-    
+
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
     TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
     
@@ -1445,9 +1445,13 @@ def pilots_window(parent = Main):
     Btn_Atras = Button(C_Pil, text="Atrás",font=nnFont, width=25,bg=uBG,fg = txtBG,
                           command=lambda: closeX(Pilots, Main)).place(x=10,y=10)
     
-    cargarPilotos(pilotos.CURRENTORDER)
-    cargarAutos()
-
+    
+    def refresh(event):
+        cargarPilotos(pilotos.CURRENTORDER)
+        cargarAutos()
+        print('w')
+        
+    listBoxAut.bind("<Map>", refresh)
     Pilots.protocol("WM_DELETE_WINDOW", lambda : closeX(Pilots, Main))
 
 #############################################################################################################################################################################
