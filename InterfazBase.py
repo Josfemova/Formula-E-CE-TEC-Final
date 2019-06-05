@@ -290,7 +290,7 @@ def test_drive_window(pilotoIndex, parent=Main):
                     data = autos.info[carro]
                     if battery < 10:
                         data[autos.iESTADO]="Descargado"
-                    data[autos.iSENSORES] = response    
+                    data[autos.iSENSORES] = response.split(';')[0]+","+response.split(';')[1]    
                     data.insert(0, carro)
                     autos.modificarAuto(*tuple(data))
             except:

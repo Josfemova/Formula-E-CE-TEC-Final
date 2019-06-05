@@ -1,5 +1,5 @@
-piloto1.png;Takumi Fujiwara;20;Japonés;1993;pwm=0.zigzag.pwm=814.pwm=854.dir=-1.dir=1;20;20;20;0;100.0;100.0
 Oliver Rowland.png;Oliver Rowland;26;Inglés;2015;pwm=0.zigzag.dir=-1.pwm=-927.dir=-1.pwm=815;1;1;1;0;100.0;100.0
+piloto1.png;Takumi Fujiwara;20;Japonés;1993;pwm=0.zigzag.pwm=814.pwm=854.dir=-1.dir=1;20;20;20;0;100.0;100.0
 Alexander Sims.png;Alexander Sims;30;Inglés;2018;dir=1.pwm=1000.pwm=-100.dir=-1;25;23;3;10;20.0;153.33
 Lucas di Grassi.png;Lucas di Grassi;34;Brasileño;2017;pwm=0.dir=-1.dir=0.pwm=933.dir=1.dir=1;45;27;8;3;19.05;64.29
 Jean-Eric Vergne.png;Jean-Eric Vergne;28;Francés;2016;pwm=0.dir=-1.dir=0.pwm=969.pwm=992.zigzag;41;15;5;8;15.15;45.45
