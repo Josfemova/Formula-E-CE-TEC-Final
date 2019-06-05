@@ -6,8 +6,8 @@ piloto1.png;Juan Gabriel;34;Panameño;2000;dir=1.dir=0;60;40;20;1;33.9;67.8
 piloto1.png;oiu;2;oie;1022;pwm=0.zigzag.zigzag.zigzag.dir=0.dir=-1;12;9;3;0;25.0;75.0
 piloto1.png;oiu;2;oie;1022;pwm=0.zigzag.zigzag.zigzag.dir=0.dir=-1;12;9;3;0;25.0;75.0
 piloto1.png;Lukas Fernz;23;Aleman;2018;dir=1.pwm=1023.dir=-1.pwm=-900.zigzag;44;7;3;2;7.14;16.67
+piloto1.png;Juanini;90;italiani;1986;pwm=0.dir=1.dir=1.zigzag.pwm=-710.zigzag;90;1;1;1;1.12;1.12
 piloto1.png;Juanini;90;italiani;2010;pwm=0.dir=1.dir=1.zigzag.pwm=-710.zigzag;100;1;1;0;1.0;1.0
 piloto1.png;Biran Wegamen;18;Belga puramierda;2019;pwm=0.zigzag.dir=0.dir=1.zigzag.dir=-1;2;0;0;0;0.0;0.0
 piloto1.png;Ferdinand Mopolos;22;Griego;2017;formatomovimiento;25;0;0;3;0.0;0.0
-piloto1.png;Juanini;90;italiani;1986;pwm=0.dir=1.dir=1.zigzag.pwm=-710.zigzag;90;1;1;1;1.12;1.12
 piloto1.png;Biran Wegamen;18;Belga puramierda;2019;pwm=0.zigzag.dir=0.dir=1.zigzag.dir=-1;2;0;0;0;0.0;0.0

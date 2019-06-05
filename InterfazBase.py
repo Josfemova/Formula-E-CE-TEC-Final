@@ -112,17 +112,27 @@ MainCanv.place(x=0,y=0)
 
 MainBG = cargar_imagen("MainFondo.png")
 MainCanv.create_image(0,0,image= MainBG, anchor = NW)
-IGE = MainCanv.create_text(800, 30, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)), font = TTFont, fill = '#FAFAFA')
-NombreEscud = MainCanv.create_text(200, 30, text = "Loui Vcker 2019", font = TTFont, fill = '#FAFAFA')
+IGE = MainCanv.create_text(890, 35, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)), font = TTFont, fill = '#FAFAFA')
+NombreEscud = MainCanv.create_text(200, 35, text = "Loui Vcker 2019", font = TTFont, fill = '#FAFAFA')
+MainCarro = 2019
 
+EstadoCarro = MainCanv.create_text(1000, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA')
+def cooords(event):
+        print(event.x)
+        print(event.y)
+MainCanv.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
+    
 
 Logo = MainCanv.create_image(620, 200, image = MainBG)
 logoimg ='logo2.PNG'
 logoref=''
 
+
+
+
 newImagen= []
 def recargaInfo():
-    global newImagen,logoimg,Logo,logoref
+    global newImagen,logoimg,Logo,logoref,EstadoCarro,MainCarro
     newImagen = []
     txtpatro = open("__InfoEscuderías\\patrocinadores.txt")
     l = (txtpatro.readline()).split(":")
@@ -133,10 +143,12 @@ def recargaInfo():
     MainCanv.itemconfig(IGE, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)))
     logoref = cargar_imagen(logoimg)
     MainCanv.itemconfig(Logo,image =logoref)
-    
-    
-    
-
+    estado=''
+    for i in range(0,len(autos.info)):
+        if (autos.info[i][autos.iTEMPO] == MainCarro):
+            estado = autos.info[i]
+            pass
+    MainCanv.itemconfig(EstadoCarro,text = ('Auto de temporada: '+estado[autos.iESTADO]))
     
     
 def modificarPatro():
@@ -220,7 +232,6 @@ def test_drive_window(pilotoIndex, parent=Main):
     celebracion = pilotos.getCelebracion(pilotoIndex)
     
     carro = int(pilotos.info[pilotoIndex][pilotos.iTEMPO])
-    print(carro)
     deEscuderia = False
     for i in range(0,len(autos.info)):
         if (autos.info[i][autos.iTEMPO] == carro):
@@ -237,27 +248,28 @@ def test_drive_window(pilotoIndex, parent=Main):
     else:
         messagebox.showinfo('Error','AUTO no se encuentra disponible')
         return
-        
-
+    
     parent.withdraw()
     def closeTestDrive():
         nonlocal carro
         nonlocal ActiveWindow
         ActiveWindow = False
-        try:
-            Answer = (send("sense;",True).split(";"))[1]
-            if "blvl:" in Answer:
-                battery = int(Answer[5:])
-                if battery < 10:
-                    data = autos.info[carro]
-                    data[autos.iESTADO]="Descargado"
-                    data.insert(0, carro)
-                    autos.modificarAuto(*tuple(data))
-        except:
-            print("error en lectura de bateria")
-
+        sleep(0.2)
         closeX(TestDrive, parent)
-        myCar.stop()
+        def getBat():
+            try:
+                Answer = (send("sense;",True).split(";"))[0]
+                if "blvl:" in Answer:
+                    battery = int(Answer[5:])
+                    if battery < 10:
+                        data = autos.info[carro]
+                        data[autos.iESTADO]="Descargado"
+                        data.insert(0, carro)
+                        autos.modificarAuto(*tuple(data))
+            except:
+                print("error en lectura de bateria")
+            myCar.stop()
+        Thread(target = getBat, args = ()).start()
             
     Speed = 0
     Moving,WPressed,APressed,SPressed,DPressed,ZPressed,XPressed,CPressed,FPressed,BlinkZ,BlinkC,SentBackON,SentBackOFF = (False,)*13
@@ -623,6 +635,7 @@ def test_drive_window(pilotoIndex, parent=Main):
     #-----------------------------------------                
     #Función WASD_Release que se activa con los eventos en los que se suelta una de las teclas especificadas:
     def WASD_Release(event):
+
         """
         Función que controla los eventos que se activarán al soltar teclas definidas
         """
@@ -676,24 +689,47 @@ def test_drive_window(pilotoIndex, parent=Main):
                     SentBackOFF = False
         #print("S was pressed and exit release while")
 
-
-    TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
-    TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
-
-
-    
-    TestDrive.protocol("WM_DELETE_WINDOW", closeTestDrive)
     def ejecutarCelebracion():
         nonlocal celebracion
-        
         for x in celebracion:
             send(x)
-        send('pwm:0;')
-        send('dir:0;')
-        send('lf:0;')
-        send('lb:0;')
-        send('lr:0;')
-        send('ll:0')
+            sleep(0.7)
+        final = ['pwm:0;','dir:0;','lf:0;','lb:0;','lr:0;','ll:0;']
+        for x in final:
+            send(x)
+            sleep(0.2)
+
+
+    uBG = '#141414'
+    txtBG = '#FAFAFA'
+
+    Button(TestDrive, text="Zigzag",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
+           command=lambda: send('ZigZag;')).place(x=1125,y=245, anchor = CENTER)
+    Button(TestDrive, text="Círculo D",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
+           command=lambda: send('Circle:1;')).place(x=1125,y=285, anchor = CENTER)
+    Button(TestDrive, text="Círculo L",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
+           command=lambda: send('Circle:-1;')).place(x=1125,y=325, anchor = CENTER)
+    Button(TestDrive, text="Inifinito",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
+           command=lambda: send('Infinite;')).place(x=1125,y=365, anchor = CENTER)
+    Button(TestDrive, text="Especial",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
+           command=lambda: send('Especial;')).place(x=1125,y=405, anchor = CENTER)
+    Button(TestDrive, text="Celebración",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =3,
+           command=lambda: ejecutarCelebracion()).place(x=1125,y=490, anchor = CENTER)
+    Button(TestDrive, text="Cerrar \n Test Drive",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =3,
+           command=lambda: closeTestDrive()).place(x=1125,y=600, anchor = CENTER)
+    
+    def cooords(event):
+        print(event.x)
+        print(event.y)
+    TestDrive.bind("<Button-1>",cooords) #Este bind funciona de la misma forma pero opera opuesto al press.
+    
+    TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
+    TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
+    
+    TestDrive.protocol("WM_DELETE_WINDOW", closeTestDrive)
+
+            
+    
         
 ############################################   
 ############################################
