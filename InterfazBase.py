@@ -6,6 +6,7 @@ Instituto Tecnológico de Costa Rica
 Escuela de Ingeniería en Computadores
 
 Curso: Taller de Programación, CE-1102
+Grupo 2
 
 Project III, Part II
 Formula E CE-TEC
@@ -30,50 +31,12 @@ Versión del programa: 1.0.0
 
 Versión de Python: 3.7.2
 ____________________________________
-"""
-AboutText ="""
-______________________________________
-Instituto Tecnológico de Costa Rica
-
-Escuela de Ingeniería en Computadores
-
-Curso: Taller de Programación, CE-1102
-
-Project III, Part II
-Formula E CE-TEC
-Energy Saving and Telemetry Part II
-
-Profesor:
-Milton Villegas Lemus
-Asistente:
-Santiago Gamboa
-
-Desarrolladores/Autores:
-Alejandro José Quesada Calderón
-Carné: 2019150208
-José Fernando Morales Vargas
-Carné: 2019024270
-
-Año: 2019
-
-País de Producción: Costa Rica
-
-Versión del programa: 1.0.0
-
-Versión de Python: 3.7.2
-____________________________________
-Hints: Verifique que el auto encendió
-correctamente.
-Verifique que tanto el equipo de telemetría
-como el auto estén
-conectados a la misma red inalámbrica.
-Utilice las teclas WASD para mover el auto.
-seleccione un piloto e inicie su Test Drive.
 """
 #    __________________________
 #___/Importación de Bibliotecas
 from tkinter import * #Para el uso de labels, canvas, Photo, etc
-from tkinter import scrolledtext #para utilizar en la ventana about
+#from tkinter import scrolledtext #para utilizar en la ventana about
+from tkinter.scrolledtext import ScrolledText as ST
 from tkinter import messagebox #Pop-up de mensajes
 from tkinter import ttk
 from WiFiClient import NodeMCU #Comunicación WIFI con el carro.
@@ -257,21 +220,87 @@ def about_window():
     Restricciones:
     Funcionamiento:
     """
+    AboutText = \
+    """
+    Instituto Tecnológico de Costa Rica
+    Escuela de Ingeniería en Computadores
+    Curso: Taller de Programación, CE-1102
+    Grupo 2
+
+    Project III, Part II
+    Formula E CE-TEC
+    Energy Saving and Telemetry Part II
+
+    Profesor:
+    Milton Villegas Lemus
+    Asistente:
+    Santiago Gamboa
+
+    Desarrolladores/Autores:
+
+    Alejandro José Quesada Calderón
+    Carné: 2019150208
+
+    José Fernando Morales Vargas
+    Carné: 2019024270
+
+    Año: 2019
+    País de Producción: Costa Rica
+    Versión del programa: 1.0.0
+    Versión de Python: 3.7.2
+    """
+    HelpText = \
+    """
+    Hints:
+
+    Al abandonar esta ventana puede modificar los
+    patrocinadores o el logo de la escudería
+
+    Para proceder con el Test Drive, debe abandonar
+    esta ventana, presionar el botón de Pilotos
+    y seleccionar alguno de los pilotos disponibles,
+    o bien crear un nuevo piloto.
+
+
+    Verifique que tanto el computador como el auto
+    estén conectados a la misma red WiFi.
+
+
+    Dentro del Test Drive, para controlar el auto
+    utilice WASD para el movimiento, Z para la
+    dirección izquierda, C para la derecha, y
+    X para apagar las direccionales.
+
+
+    Las luces frontales se encienden con F, las traseras son automáticas.
+    """
     About = Toplevel()
     About.title("About")
-    About.minsize(800,600)
-    About.resizable(width= NO, height= NO)
-    AboutCanv = Canvas(About, width= 800, height= 600,bg="grey")
-    AboutCanv.place(x=0,y=0)
-    Info = scrolledtext.ScrolledText(About,width= 40, height= 10,bg= "black", fg= "cyan") #no es una medida en pixeles
-    Info.insert(INSERT,AboutText) #Se añade el texto del comentario multilínea perteneciente a la variable, dentro del scrolledtext.
-    Info.place(x = 400, y = 10)
-    FotoAle = cargar_imagen("AlejandroPrueba.png")
-    AboutCanv.create_image(1,1,image=FotoAle,anchor = NW)
-    #Se define una función para el botón de atrás a la principal
-        
-    BtnBack1 =  Button(AboutCanv, text= "Main",command =lambda: closeX(About, Main),fg = "cyan", bg= "black")
-    BtnBack1.place(x = 600, y = 500)
+    About.geometry("700x690")
+    About.resizable(width = NO, height = NO)
+
+
+    C_About = Canvas(About, width = 1280, height = 720, bg = "#FAFAFA") #Cercano al RGB(255) en los 3 aspectos
+    C_About.pack(anchor = NW, fill = Y)
+    C_About.FondoAbout = FondoAbout = cargar_imagen("FondoAbout.png")
+    C_About.create_image(-200,0,image = FondoAbout, anchor = NW)
+    C_About.Alejandro = FotoAlejandro = cargar_imagen("Alejandro.png")
+    C_About.create_image(10,500, image = FotoAlejandro, anchor = NW)
+    C_About.Morales = FotoMorales = cargar_imagen("Morales.png")
+    C_About.create_image(170, 500, image = FotoMorales, anchor = NW)
+    C_About.Creditos = AboutText
+    C_About.create_text(10,10,anchor = NW, text = AboutText, font = ("Helvetica", 10, "bold italic"),
+                        fill = "#FAFAFA", justify = CENTER)
+    
+    C_About.Hints = Hints = ST(C_About, width = 50, height = 15, bg = "Black", font = ("Helvetica", 10, "bold italic"), fg = "white",bd = 0)
+    C_About.Hints.insert(INSERT,HelpText)
+    C_About.Hints.place(x = 320, y= 20)
+
+
+    
+    Btn_CerrarAb= Button(C_About, command =lambda: closeX(About, Main),  text = "Volver", bg = "black", fg = "#FAFAFA",
+                         font = ("Helvetica", 14, "bold italic"), height = 3, width = 27,bd=3)
+    Btn_CerrarAb.place(x = 340,y = 570, anchor = NW)
 
 
 
@@ -395,6 +424,16 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestDrive.dirl = DirLight = cargar_imagen("EmL.png")
     TestCanv.create_image(840,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
     TestCanv.create_image(930,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
+    
+    TestCanv.dir0  = dir0 = cargar_imagen("Directo.png")
+    TestCanv.create_image(635,180, image = dir0, anchor = NE, state = NORMAL)
+    TestCanv.create_image(645,180, image = dir0, anchor = NW, state = NORMAL)
+    TestCanv.dirI  = dirI = cargar_imagen("Izquierda.png")
+    TestCanv.dirD  = dirD = cargar_imagen("Derecha.png")
+    TestCanv.create_image(635,180, image = dirI, anchor = NE,tags = ("tl"), state = HIDDEN)
+    TestCanv.create_image(645,180, image = dirD, anchor = NW,tags = ("tr"), state = HIDDEN)
+
+    
     TestDrive.bl = BackLight= cargar_imagen("BackL.png")
     TestCanv.create_image(855,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
     TestCanv.create_image(905,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
@@ -932,11 +971,11 @@ def test_drive_window(pilotoIndex, parent=Main):
            command=lambda: ejecutarCelebracion()).place(x=1125,y=490, anchor = CENTER)
     Button(TestDrive, text="Cerrar \n Test Drive",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =3,
            command=lambda: closeTestDrive()).place(x=1125,y=600, anchor = CENTER)
-    
+##    
 ##    def cooords(event):
 ##        print('x',event.x,'y',event.y)
 ##    TestDrive.bind("<Button-1>",cooords)
-##    
+    
     TestDrive.bind("<KeyPress>", WASD_Press) #Se le asigna el bind a la función WASD_Press().
     TestDrive.bind("<KeyRelease>",WASD_Release) #Este bind funciona de la misma forma pero opera opuesto al press.
     
