@@ -39,8 +39,12 @@ class main_Autos:
 
     def agregarAuto(self,marca, mod , pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef):
         nuevoDatos = [marca, mod, pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef]
+        for x in self.info:
+            if int(temp) == x[self.iTEMPO]:
+                return False
         self.info.append(nuevoDatos)
         self.actualizarArchivo()
+        return True
             
     def modificarAuto(self, pos, marca, mod , pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef):
         modDatos = [marca, mod , pai, fot, temp, cntbat, ppb, vpb, est, consu, sense, peso, ef]

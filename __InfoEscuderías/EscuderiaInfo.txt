@@ -1,13 +1,10 @@
-piloto1.png;Alejadro Esquivel;23;Colombiano;2001;dir=1.pwm=1000.pwm=-100.dir=-1;30;25;25;1;86.21;86.21
-piloto1.png;Rogelio Tinoco;22;Croata;2016;pipupupio;50;40;30;4;65.22;86.96
-piloto1.png;Rogelio Tinoco;22;Croata;2016;pipupupio;50;40;30;4;65.22;86.96
-piloto1.png;Skulinski Provodoski;22;Croata;2016;pipupupio;50;40;30;4;65.22;86.96
-piloto1.png;Juan Gabriel;34;Panameño;2000;dir=1.dir=0;60;40;20;1;33.9;67.8
-piloto1.png;oiu;2;oie;1022;pwm=0.zigzag.zigzag.zigzag.dir=0.dir=-1;12;9;3;0;25.0;75.0
-piloto1.png;oiu;2;oie;1022;pwm=0.zigzag.zigzag.zigzag.dir=0.dir=-1;12;9;3;0;25.0;75.0
-piloto1.png;Lukas Fernz;23;Aleman;2018;dir=1.pwm=1023.dir=-1.pwm=-900.zigzag;44;7;3;2;7.14;16.67
-piloto1.png;Juanini;90;italiani;1986;pwm=0.dir=1.dir=1.zigzag.pwm=-710.zigzag;90;1;1;1;1.12;1.12
-piloto1.png;Juanini;90;italiani;2010;pwm=0.dir=1.dir=1.zigzag.pwm=-710.zigzag;100;1;1;0;1.0;1.0
-piloto1.png;Biran Wegamen;18;Belga puramierda;2019;pwm=0.zigzag.dir=0.dir=1.zigzag.dir=-1;2;0;0;0;0.0;0.0
-piloto1.png;Ferdinand Mopolos;22;Griego;2017;formatomovimiento;25;0;0;3;0.0;0.0
-piloto1.png;Biran Wegamen;18;Belga puramierda;2019;pwm=0.zigzag.dir=0.dir=1.zigzag.dir=-1;2;0;0;0;0.0;0.0
+Oliver Rowland.png;Oliver Rowland;26;Inglés;2015;pwm=0.zigzag.dir=-1.pwm=-927.dir=-1.pwm=815;1;1;1;0;100.0;100.0
+piloto1.png;Takumi Fujiwara;20;Japonés;1993;pwm=0.zigzag.pwm=814.pwm=854.dir=-1.dir=1;20;20;20;0;100.0;100.0
+Alexander Sims.png;Alexander Sims;30;Inglés;2018;dir=1.pwm=1000.pwm=-100.dir=-1;25;23;3;10;20.0;153.33
+Lucas di Grassi.png;Lucas di Grassi;34;Brasileño;2017;pwm=0.dir=-1.dir=0.pwm=933.dir=1.dir=1;45;27;8;3;19.05;64.29
+Jean-Eric Vergne.png;Jean-Eric Vergne;28;Francés;2016;pwm=0.dir=-1.dir=0.pwm=969.pwm=992.zigzag;41;15;5;8;15.15;45.45
+Felipe Massa.png;Felipe Massa;37;Brasileño;2017;pwm=0.dir=-1.dir=0.pwm=1013.dir=-1.pwm=978;10;2;1;2;12.5;25.0
+Jérome D'Ambrosio.png;Jérome D'Ambrosio;32;Belga;2017;pwm=0.dir=0.dir=1.dir=1.dir=1.pwm=946;45;7;2;2;4.65;16.28
+Nelson Piquet Jr.png;Nelson Piquet Jr;33;Alemán;2014;pwm=0.dir=1.zigzag.pwm=883.dir=-1.dir=1;45;5;2;1;4.55;11.36
+Antonio Félix da Costa.png;Antonio Félix Da Costa;27;45;2019;pwm=0.dir=1.dir=1.pwm=847.pwm=962.dir=1;45;1;1;0;2.22;2.22
+Pascal Wehrlein.png;Pascal Wehrlein;24;Alemania;2019;pwm=0.zigzag.dir=1.dir=1.dir=0.dir=-1;1;0;0;0;0.0;0.0

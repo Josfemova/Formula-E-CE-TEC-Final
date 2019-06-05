@@ -116,7 +116,7 @@ IGE = MainCanv.create_text(890, 35, text = "Índice Ganador de Escudería: " + s
 NombreEscud = MainCanv.create_text(200, 35, text = "Loui Vcker 2019", font = TTFont, fill = '#FAFAFA')
 MainCarro = 2019
 
-EstadoCarro = MainCanv.create_text(1000, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA')
+EstadoCarro = MainCanv.create_text(640, 690, text = '', font = ('Helvetica',22,' bold italic'), fill = '#FAFAFA', anchor = CENTER)
 def cooords(event):
         print(event.x)
         print(event.y)
@@ -141,14 +141,17 @@ def recargaInfo():
         MainCanv.create_image(i*170+200, 600, image = newImagen[i])
     txtpatro.close()
     MainCanv.itemconfig(IGE, text = "Índice Ganador de Escudería: " + str(round(pilotos.IGE, 2)))
-    logoref = cargar_imagen(logoimg)
-    MainCanv.itemconfig(Logo,image =logoref)
     estado=''
     for i in range(0,len(autos.info)):
         if (autos.info[i][autos.iTEMPO] == MainCarro):
             estado = autos.info[i]
             pass
     MainCanv.itemconfig(EstadoCarro,text = ('Auto de temporada: '+estado[autos.iESTADO]))
+
+    txtLOG = open("__InfoEscuderías\\logo.txt")
+    logoimg = txtLOG.readline() + '.png'
+    logoref = cargar_imagen(logoimg)
+    MainCanv.itemconfig(Logo,image =logoref)
     
     
 def modificarPatro():
@@ -178,7 +181,30 @@ def modificarPatro():
         
     Btn = Button(cmod, text = 'Actualizar', font = TTFont, command = actualizar)
     Btn.grid(row = 2, column=1)
-
+    
+def modificarLogo():
+    modLog = Toplevel()
+    modLog.geometry('700x150')
+    modLog.title('Logos')
+    cmod = Canvas(modLog, width = 700, height = 150)
+    cmod.pack()
+    mensaje = ('para modificar el Logo debe escribir el '
+               'nombre del archivo de imagen sin extensión')
+    Label(cmod, text = mensaje).grid(row=0, column =1 )
+    text = Entry(cmod, justify = CENTER, width = 50, font = nnFont)
+    text.grid(row = 1, column = 1)
+    txtLOG = open("__InfoEscuderías\\logo.txt")
+    l = txtLOG.readline()
+    text.insert(0,l)
+    txtLOG.close
+    def actualizar():
+        txtLOG= open("__InfoEscuderías\\logo.txt",'w')
+        txtLOG.write(text.get())
+        txtLOG.close()
+        recargaInfo()
+        modLog.destroy()
+    Btn = Button(cmod, text = 'Actualizar', font = TTFont, command = actualizar)
+    Btn.grid(row = 2, column=1)
     
 recargaInfo()
 
@@ -203,8 +229,8 @@ def btn_pilots():
 
 def closeX(widgetObj,parent=''):
     widgetObj.destroy()
-    recargaInfo()
     if parent !='':
+        recargaInfo()
         parent.deiconify()
 
 #    _____________
@@ -839,7 +865,7 @@ def pilots_window(parent = Main):
     C_Pil.create_text(550, 20, text = 'Pilotos', fill = txtBG, font = TTFont, anchor = NW)
     #labelPil = Label(C_Pil, text="Pilotos",bg=txtBG,fg = uBG, font=TTFont).grid(row=0, columnspan=4)
     cols = ('Pos','Nombre Completo',"Edad","Nacionalidad","Tempo","Eventos","Podio","Victorias","Abandonos","REP","RGP")
-    listBox = ttk.Treeview(C_Pil,columns=cols,height = 5)
+    listBox = ttk.Treeview(C_Pil,columns=cols,height = 6)
     for col in cols:
         listBox.heading(col, text=col)
     listBox.heading('REP', command =lambda : cargarPilotos("REP"))
@@ -856,11 +882,11 @@ def pilots_window(parent = Main):
 
     #Organización del TreeView de Autos
     #-------------------------------------------------------------------------
-    Frame(C_Pil, height = 70).grid(row=4, columnspan =4)
-    C_Pil.create_text(550, 550, text = 'Autos', fill = txtBG, font = TTFont, anchor = NW)
+    Frame(C_Pil, height = 20).grid(row=4, columnspan =4)
+    C_Pil.create_text(550, 565, text = 'Autos', fill = txtBG, font = TTFont, anchor = NW)
     #labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
     colsAut = ('Marca','Modelo','Origen','Temporada','Baterias','CPB','VoltPB','Estado','Consumo','sensores','Peso','Eficiencia')
-    listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 3)
+    listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 5)
     for col in colsAut:
         listBoxAut.heading(col, text=col)
     listBoxAut.heading('Eficiencia', command =lambda : cargarAutos())
@@ -930,7 +956,7 @@ def pilots_window(parent = Main):
             for x in hojaTec:
                 newData.append(x.get())                   
             for i in range(0, len(newData)):
-                if i!= 0 and i!= 2 :
+                if i!= 0 and i!=1 and i!= 3 :
                     try:
                         float(newData[i])
                     except:
@@ -1048,7 +1074,9 @@ def pilots_window(parent = Main):
             newData.insert(autos.iFOTO, newData[-1])
             newData.pop(-1)
             tuple(newData)
-            autos.agregarAuto(*newData)
+            agregado = autos.agregarAuto(*newData)
+            if not agregado:
+                messagebox.showinfo('error','Ya existe un auto para esta temporada')
             closeAP()
 
             
@@ -1165,7 +1193,10 @@ BtnPilots = Button(MainCanv, text= "Autos y Pilotos",font = TTFont, command = bt
 BtnPilots.place(x = 800, y = 100)
 
 BtnPilots = Button(MainCanv, text= "Modificar Patrocinadores",font = nnFont, command = modificarPatro,fg= "#FAFAFA",bg ="black") #para editar patrocinadores
-BtnPilots.place(x = 500, y = 670)
+BtnPilots.place(x = 1000, y = 670)
+
+BtnPilots = Button(MainCanv, text= "Modificar Logo",font = nnFont, command = modificarLogo,fg= "#FAFAFA",bg ="black") #para editar patrocinadores
+BtnPilots.place(x = 10, y = 670)
 
 Main.protocol("WM_DELETE_WINDOW", lambda : closeX(Main))
     

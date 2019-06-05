@@ -1,1 +1,1 @@
-ARM:Panasonic:AMD
+ARM:Panasonic:AMD:Adidas
