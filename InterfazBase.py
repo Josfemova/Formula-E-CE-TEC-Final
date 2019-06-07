@@ -963,6 +963,12 @@ def test_drive_window(pilotoIndex, parent=Main):
             sleep(0.2)
             
     def calcEficiencia():
+        """
+        Entradas:
+        Salidas:
+        Restricciones:
+        Funcion
+        """
         mensaje = Toplevel(TestDrive)
         mensaje.title('Espere')
         mensaje.geometry('200x100')
@@ -982,7 +988,9 @@ def test_drive_window(pilotoIndex, parent=Main):
                     return
                 
                 send("Circle:1;")
+                Sleep(10)
                 send("Circle:1;")
+                Sleep(10)
                 response = (send("sense;",True))
                 Answer = (response.split(';'))[0]
                 BateriaFinal= 0
