@@ -961,7 +961,63 @@ def test_drive_window(pilotoIndex, parent=Main):
         for x in final:
             send(x)
             sleep(0.2)
-
+            
+    def calcEficiencia():
+        mensaje = Toplevel(TestDrive)
+        mensaje.title('Espere')
+        mensaje.geometry('200x100')
+        Label(mensaje, text = 'Espere, \n actualizando datos', font = nnFont).pack()
+        resultado = ""
+        def calcBat():
+            nonlocal resultado
+            try:
+                response = (send("sense;",True))
+                Answer = (response.split(';'))[0]
+                BateriaInicial = 0
+                if "blvl:" in Answer:
+                    BateriaInicial= int(Answer[5:])
+                else:
+                    resultado = "error en recuperar información de batería, intente de nuevo"
+                    endCalc()
+                    return
+                
+                send("Circle:1;")
+                send("Circle:1;")
+                response = (send("sense;",True))
+                Answer = (response.split(';'))[0]
+                BateriaFinal= 0
+                if "blvl:" in Answer:
+                    BaterialFinal = int(Answer[5:])
+                else:
+                    resultado = "error en recuperar información de batería, intente de nuevo"
+                    endCalc()
+                    return
+                
+                data = autos.info[carro]
+                nuevaEficiencia = BateriaInicial - BateriaFinal
+                if (nuevaEficiencia) >=0: 
+                    data[autos.iEFICIENCIA]=nuevaEficiencia 
+                    data.insert(0, carro)
+                    autos.modificarAuto(*tuple(data))
+                    resultado = "Eficiencia guardad de: "+ str(nuevaEficiencia)
+                    endCalc()
+                    return
+                else:
+                    resultado = "error en recuperar información de batería, intente de nuevo"
+                    endCalc()
+                    return
+            except:
+                resultado = "error en recuperar información de batería, intente de nuevo"
+                endCalc()
+                return
+            
+        def endCalc():
+            mensaje.destroy()
+            messagebox.showinfo('Resultado', resultado)
+            
+        Thread(target = calcBat, args = ()).start()
+        
+        
 
     uBG = '#141414'
     txtBG = '#FAFAFA'
@@ -976,8 +1032,10 @@ def test_drive_window(pilotoIndex, parent=Main):
            command=lambda: send('Infinite;')).place(x=1125,y=365, anchor = CENTER)
     Button(TestDrive, text="Especial",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
            command=lambda: send('Especial;')).place(x=1125,y=405, anchor = CENTER)
-    Button(TestDrive, text="Celebración",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =3,
-           command=lambda: ejecutarCelebracion()).place(x=1125,y=490, anchor = CENTER)
+    Button(TestDrive, text="Celebración",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =1,
+           command=lambda: ejecutarCelebracion()).place(x=1125,y=445, anchor = CENTER)
+    Button(TestDrive, text="Eficiencia",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =1,
+           command=lambda: calcEficiencia()).place(x=1125,y=485, anchor = CENTER)
     Button(TestDrive, text="Cerrar \n Test Drive",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,height =3,
            command=lambda: closeTestDrive()).place(x=1125,y=600, anchor = CENTER)
 ##    
