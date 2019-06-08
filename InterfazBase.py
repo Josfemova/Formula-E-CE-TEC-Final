@@ -60,8 +60,8 @@ def cargar_imagen(Nombre):
     """
     Entradas:Nombre
     Salidas:referencia a photoImage Creada
-    Restricciones:Nombre debe referenciar una imagen exitente
-    Funcionamiento: Carga una photoimage seg[un el nombre de imagen que se ingresa
+    Restricciones:Nombre debe referenciar una imagen exitente, esta debe encontrarse en la carpeta imagenes dentro de _Interfaz
+    Funcionamiento: Carga una photoimage según el nombre de imagen que se ingresa
     """
     ruta = os.path.join("__Interfaz\\imagenes",Nombre)
     Imagen = PhotoImage(file = ruta)
@@ -186,22 +186,36 @@ recargaInfo()
 #___/Funciones para uso de botones definidos al final del programa
 
 def btn_about():
-    Main.withdraw()
-    about_window()
+    """
+    Comando del botón para iniciar la ventana de about/información
+    """
+    Main.withdraw() #Guarda la ventana principal
+    about_window() #Invoca la funcion de la ventana de información
 
 def btn_test():
-    Main.withdraw()
-    test_drive_window()
+    """
+    Comando del botón para iniciar la ventana de Test Drive
+    Nota: esta sólo puede accederse por medio de la ventana de pilotos.
+    """
+    Main.withdraw() #Guarda la ventana principal
+    test_drive_window() #Invoca la función de la ventana de pruebas/ Test Drive
 
 def btn_pilots():
+    """
+    Comando del botón para iniciar la ventana de pilotos/autos
+    """
     Main.withdraw()
     pilots_window()
 
 def closeX(widgetObj,parent=''):
-    widgetObj.destroy()
-    if parent !='':
+    """
+    Función general que puede utilizarse para cerrar cualquier ventana.
+    Restricciones: para invocar este módulo debe utilizarse la exprexión lambda a la hora de asignarla como comando.
+    """
+    widgetObj.destroy() #Destruye la ventana del primer parámetro
+    if parent !='': #Si el parent invocado es una ventana y no se deja como una cadena vacía:
         recargaInfo()
-        parent.deiconify()
+        parent.deiconify() #Se reabre la ventana "parent" del widget a cerrar.
 
 #    _____________
 #___/ventana about
@@ -565,10 +579,11 @@ def test_drive_window(pilotoIndex, parent=Main):
         """
         Función send para enviar comandos al Node
         Esta funcion es una modificación a la dada en el archivo TelemetryLog por Santiago Gamboa (Asistente del Curso)
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas: el mensaje a enviarle al auto para que este lo procese como comando.
+        Salidas: el comando a enviar por medio de la clase NodeMCU.
+        Restricciones: Debe ser un comando válido de los que se incorporaron en la primera parte del proyecto.
+        Funcionamiento: SE comunica con el hardware a través de la clase NodeMCU, utiliza el método send para hacerle llegar este comando,
+            luego el método readById para obtener la respuesta del mismo.
         """
         if(len(Msg)>0 and Msg[-1] == ";"):
             response = myCar.send(Msg)
@@ -594,16 +609,17 @@ def test_drive_window(pilotoIndex, parent=Main):
 
     def dia_noche(Answer):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas: La respuesta obtenida por el WiFiClient al enviar el comando sense;
+        Salidas: un cambio en la interfaz gráfica para cuando la luz del ambiente cambie de intensidad.
+        Restricciones: La entrada debe haber pasado por otras funciones que las procesen para trabajar con los índices correctamente
+        Funcionamiento: Trabaja la cadena de entrada por medio de índices, valida el caracter que está en la posición -3, si este es un 0
+        o un 1, cambia el fondo dependiendo de cual sea para dar alusión a la iluminación.
         """
         #Validar la posición del caracter en el que la LDR manda la variable light
         
         if Answer[-3] == "0":
-            TestCanv.itemconfig("dia", state = HIDDEN)
-            TestCanv.itemconfig("noche", state = NORMAL)
+            TestCanv.itemconfig("dia", state = HIDDEN) #Oculta los elementos con la etiqueta de día y muestra los de noche
+            TestCanv.itemconfig("noche", state = NORMAL) #En estos casos son sólo los fondos.
         elif Answer[-3] == "1":
             TestCanv.itemconfig("dia", state = NORMAL)
             TestCanv.itemconfig("noche", state = HIDDEN)
@@ -612,10 +628,11 @@ def test_drive_window(pilotoIndex, parent=Main):
 
     def bateria(Answer):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas:La respuesta obtenida por el WiFiClient al enviar el comando sense;
+        Salidas: una configuración en pantalla de la lectura del sensor de batería, guardando este en una variable.
+        Restricciones: La entrada (respuesta) debe haber sido tratada con otras funciones para que este comportamiento se lleve a cabo exitosamente.
+        Funcionamiento: Valida el largo de la respuesta, ya que esta puede cambiar dependiendo de la cantidad de dígitos que se lean en el sensor, para
+        cada caso válido, se configura un elemento con la etiqueta battext a que contenga el nuevo valor de la batería.
         """
         if len(Answer) == 14:
             Battery = Answer[5]
@@ -633,12 +650,14 @@ def test_drive_window(pilotoIndex, parent=Main):
         """
         Función que controla los eventos que se activarán al presionar teclas definidas
 
-        Entradas:
-        Salidas:
-        Restricciones:
+        Entradas: el evento enviado por el binding asignado dentro de la ventana TEst Drive
+        Salidas: variadas para cada evento, dependiendo de cada tecla.
+        Restricciones: la entrada sólo puede ser un evento.
         """
+        #Se solicita el valor de estas variables previamente asignados en la ventana Test Drive, para que todos los eventos se manejen
+        #en sincronía  y se pueda utilizar estas variables para validar condiciones/ detener hilos de ejecución.
         nonlocal WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed, FLight, Blight, BlinkZ, BlinkC
-
+        #Asigna los eventos a letras en el teclado
         Key = event.char
         if Key == "w":
             if not WPressed and not SPressed:
@@ -659,6 +678,7 @@ def test_drive_window(pilotoIndex, parent=Main):
                 ThreadBacklightsP = Thread(target = back_light_control_press)
                 ThreadBacklightsP.start()
                 Thread(target=gradualAccRed, args=()).start()
+                #Hilo que controla la reversa/ detención del auto
             else:
                 return
         elif Key == "a":
@@ -667,12 +687,14 @@ def test_drive_window(pilotoIndex, parent=Main):
                 APressed = True
                 #código para activar o desactivar las imágenes que dan feedback de giro en la interfaz de usuario.
                 TestCanv.itemconfig("tl", state = NORMAL)
+                #tl representa los elementos que se crearon para el caso "turn left".
             else:
                 return
         elif Key == "d":
             if not DPressed and not APressed:
                 send("dir:1;")
                 DPressed = True
+                #Se configuran los elementos que deben activarse al girar a la derecha para que se muestren en pantalla.
                 TestCanv.itemconfig("tr", state = NORMAL)
             else:
                 return
@@ -682,7 +704,7 @@ def test_drive_window(pilotoIndex, parent=Main):
                 if BlinkZ:
                     return
                 else:
-                    thread_blink("L")
+                    thread_blink("L") #Se invoca una función que utiliza este argumento para condicionar el inicio de un hilo.
             else:
                 return
         elif Key == "x":
@@ -690,8 +712,10 @@ def test_drive_window(pilotoIndex, parent=Main):
                 XPressed = True
                 BlinkZ = False
                 BlinkC = False
+                #Se pasan las variables de parpadeo en ambas direcciones a falso, pues esta tecla se utiliza para detener estos procesos
                 TestCanv.itemconfig("left", state = HIDDEN)
                 TestCanv.itemconfig("right", state = HIDDEN)
+                #Se ocultan las imágenes de las direccionales en la interfaz.
             else:
                 return
         elif Key == "c":
@@ -700,13 +724,17 @@ def test_drive_window(pilotoIndex, parent=Main):
                 if BlinkC:
                     return
                 else:
-                    thread_blink("R")
+                    thread_blink("R") #Se invoca una función que utiliza este argumento para condicionar el inicio de un hilo.
             else:
                 return
         elif Key == "f":
             if not FPressed:
+                #Inmediatamente se cambia la variable a True en el primer evento, para asi evitar que el sistema envíe todas las presiones de la tecla
+                #Como eventos a la función, esta variable retorna a su estado de falso (abriendo la posibilidad de un nuevo evento) hasta que es liberada
+                #Por el usuario.
                 FPressed = True
                 if FLight:
+                    #Se utiliza esta variable y sus cambios con el objetivo de poder encender y apagar las frontales con la misma tecla. 
                     send("lf:1;")
                     FLight = False
                     TestCanv.itemconfig("front",state = NORMAL)
@@ -723,12 +751,12 @@ def test_drive_window(pilotoIndex, parent=Main):
     def gradual_front():
         """
         Función que es invocada por el hilo de aceleración para generar un avance gradual
-        
-        Entradas:
-        Salidas:
-        Restricciones:
+        Restricciones: Es para iniciar un proceso, debe ser invocada sin argumentos, pues dentro de ella se solicitan las variables que
+        necesita para operar normalmente.
         """
+        #Nuevamente se invocan las variables declaradas al inicio de la ventana para controlar todos los eventos com más facilidad y al mismo tiempo.
         nonlocal Speed, Moving, WPressed, SPressed, SentBackOFF,SentBackON
+        #Las últimas dos variables son para controlar el estado de las luces traseras.
         WPressed = True
         Moving = True
         while Speed < 400 and WPressed and not SPressed:
@@ -777,12 +805,11 @@ def test_drive_window(pilotoIndex, parent=Main):
     def gradual_back():
         """
         Función que es invocada por el hilo de desaceleración/reversa para generar un movimiento gradual hacia atrás.
-
-        Entradas:
-        Salidas:
-        Restricciones:
+        Restricciones: esta, al igual que la que controla el hilo de aceleración, debe ser invocada sin argumentos.
         """
         nonlocal Speed,Moving, SPressed, WPressed
+        #Se invocan las variables fuera del espectro local de la función con el objetivo de ser capaz de detener su ejecución /validar que no se repita la función
+        #Durante el mismo evento.
         SPressed = True
         while Speed > -400 and SPressed and not WPressed:
             if Speed==1023:
@@ -814,15 +841,19 @@ def test_drive_window(pilotoIndex, parent=Main):
         
     def thread_blink(Direction):
         """
-        Función que recibe la dirección a la que se desea activar el hilo de parpadeo para las direccionales.
+        Función que controla el parpadeo de las direccionales
+        Entradas: la dirección en la que se quiere iniciar el parpadeo
+        Restricciones: esta dirección sólo puede ser una L o una R mayúsculas dadas en string.
         """
         nonlocal ZPressed, CPressed, BlinkZ, BlinkC
         if ZPressed and not (CPressed or XPressed):
             BlinkZ = True
+            #Se activa la variable de parpadeo a la izquierda (con tecla Z) y se activa el hilo
             ThreadBlink = Thread(target = blink_lights, args = [Direction, 0])
             ThreadBlink.start()
         elif CPressed and not (ZPressed or XPressed):
             BlinkC = True
+            #se activa la variable de parpadeo a la derecha (con tecla C) y se activa el hilo.
             ThreadBlink = Thread(target = blink_lights, args = [Direction, 0])
             ThreadBlink.start()
         else:
@@ -830,16 +861,31 @@ def test_drive_window(pilotoIndex, parent=Main):
     #--------------------
         
     def blink_lights(Direction, Counter):
+        """
+        Función que automatiza el proceso de parpadeo en las luces direccionales.
+        Entrdas: La dirección en la que se desea activar el parpadeo, y el contador que se utilizará como valor inicial
+            para condicionar el comando que se envía al auto.
+        Salidas: Configuracion de objetos en el canvas, y mensajes a la clase myCar o NodeMCU de WiFiClient.
+        Restricciones: Sólo puede ser invocada por el hilo, de lo contrario esta funcionará sólo para un ciclo y no se podrá ejecutar otro
+        proceso paralelamente a este.
+        """
         nonlocal ZPressed, CPressed, XPressed, BlinkC, BlinkZ
+        #En esta función el contador se utiliza para generar un residuo con 2 (dado que el módulo de dos sólo retorna dos elementos, 0 o 1.
+        #Gracias a esto, es fácil controlar la activación y desactivacion de las luces.
         if Direction == "L":
             while BlinkZ and ActiveWindow:
+                #Se define la variable LED como el módulo 2 del contador.
                 LED = Counter%2
                 send("ll:" + str(LED) + ";")
+                #Se le envía al NodeMCU el comando de control para la direccional, el valor que determina si debe
+                #Apagarlas o encenderlas se determina por el valor actual del contador en esta ejecución.
                 if LED == 1:
+                    #Se configuran los objetos en pantalla.
                     TestCanv.itemconfig("left", state = NORMAL)
                     #print("Left light is ON")
                     Counter += 1
                 else:
+                    #Se configuran los objetos en pantalla.
                     TestCanv.itemconfig("left", state = HIDDEN)
                     #print("Left light is OFF")
                     Counter += 1
@@ -868,15 +914,20 @@ def test_drive_window(pilotoIndex, parent=Main):
         #---------------------------------
 
     def back_light_control_press():
+        """
+        Función que controla el estado de las luces traseras a medida que se presiona la tecla S
+        """
+        #Se utilizan las variables de la ventana, fuera de tanto el puntero local de la función, como el global del programa.
         nonlocal Speed, SentBackON, SentBackOFF, SPressed
+        #Este proceso se ejecutará siempre que la tecla S se esté presionando (ya que su variable cambia a falso sólo cuando esta se libera)
         while SPressed:
-            if SentBackON:
+            if SentBackON: #Utiliza la variable para verificar si ya le envió a las luces traseras que debían encenderse, si ya lo hizo, se mantiene en espera.
                 return
             else:
-                send("lb:1;")
+                send("lb:1;") #Si no le ha enviado a las luces que se enciendan, les envía el comando de encendido
                 #print("SentBackON")
-                TestCanv.itemconfig("back",state = NORMAL)
-                SentBackON = True
+                TestCanv.itemconfig("back",state = NORMAL) #Configura los objetos en pantalla con la etiqueta dada para que se muestre el estado de las luces.
+                SentBackON = True #Cambia la variable a verdadero porque acaba de encenderlas y sólo debe enviarse una vez por presion de la tecla.
                 SentBackOFF = False
         #print("S released, exit press while")
     #-----------------------------------------                
@@ -886,25 +937,31 @@ def test_drive_window(pilotoIndex, parent=Main):
         """
         Función que controla los eventos que se activarán al soltar teclas definidas
         """
+        #Al igual que a la función que controla la presion de teclas, esta trabaja con eventos del teclado específicos (validados dentro de la funcion)
         nonlocal WPressed, APressed, SPressed, DPressed, ZPressed, XPressed, CPressed, FPressed
         Key = event.char
+        #Se asigna el evento a una variable local Key
         #print(Key)
+
+        #Cambiará cada variable a falso (para las que funcionan como indicador de que la tecla se está presionando)
         if Key == "w":
             WPressed = False
-            Thread(target=gradualOff,args = ('GR',)).start()
+            Thread(target=gradualOff,args = ('GR',)).start() #Se invoca al hilo para retornar las luces de indicador aceleración a apagadas a medida que se desacelera
         elif Key == "s":
             SPressed = False
             ThreadBacklightsR = Thread(target = back_light_control_release)
+            #Si se suelta la S, invoca a la funcion que controla el estado de las luces traseras si esta
+            #Tecla no se está presionando
             ThreadBacklightsR.start()
-            Thread(target=gradualOff,args = ('RE',)).start()
+            Thread(target=gradualOff,args = ('RE',)).start() #Invoca al hilo para retornar las luces de indicador de frenado a apagadas a medida que se acelera
         elif Key == "a":
             APressed = False
-            send("dir:0;")
-            TestCanv.itemconfig("tl", state = HIDDEN)
+            send("dir:0;") #Se envía al carro que retorne a la dirección central
+            TestCanv.itemconfig("tl", state = HIDDEN) #Se ocultan las ruedas delanteras en pantalla.
         elif Key == "d":
             DPressed = False
-            send("dir:0;")
-            TestCanv.itemconfig("tr", state = HIDDEN)
+            send("dir:0;") #Se envía al carro que retorne a la dirección central
+            TestCanv.itemconfig("tr", state = HIDDEN) #SE ocultan las ruedas delanteras en pantalla.
         elif Key == "z":
             ZPressed = False
         elif Key == "x":
@@ -916,25 +973,24 @@ def test_drive_window(pilotoIndex, parent=Main):
 
     def back_light_control_release():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: Controla el estado de las luces traseras cuando la S no se esté presionando (y la ventana siga activa)
         """
+        #Se trabaja con las variables no-locales
         nonlocal SPressed, SentBackON, SentBackOFF, Speed, WPressed
         #print(SPressed)
         while not SPressed and ActiveWindow:
-            while Speed >= 0:
-                if SentBackOFF:
+            while Speed >= 0: #Entra a esta condición si la potencia es positiva o igual que 0, pues aquí, si se libera la tecla S, debe apagar las lb.
+                if SentBackOFF: #Verifica si ya envió las luces a un estado de apagado, esto con el objetivo de que el comando se envíe una vez cada repetición.
                     return
                 else:
-                    send("lb:0;")
+                    send("lb:0;") #Si no se había enviado el comando, envía que se apaguen las luces
                     #print("SentBackOFF")
-                    TestCanv.itemconfig("back", state = HIDDEN)
-                    SentBackOFF = True
+                    TestCanv.itemconfig("back", state = HIDDEN) #Oculta los elementos en pantalla que corresponden a las luces
+                    SentBackOFF = True #Cambia la variable a verdadero pues acaba de retornarlas a apagado.
                     SentBackON = False
             else:
-                if SentBackON:
+                #Se entra a esta condición si la tecla no se está presionando, pero la potencia/pwm está en un valor negativo( en este caso debe permanecer encendida)
+                if SentBackON: 
                     return
                 else:
                     send("lb:1;")
