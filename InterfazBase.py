@@ -58,10 +58,10 @@ nnFont = ('Helvetica', 15, 'bold italic')
 
 def cargar_imagen(Nombre):
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Entradas:Nombre
+    Salidas:referencia a photoImage Creada
+    Restricciones:Nombre debe referenciar una imagen exitente
+    Funcionamiento: Carga una photoimage seg[un el nombre de imagen que se ingresa
     """
     ruta = os.path.join("__Interfaz\\imagenes",Nombre)
     Imagen = PhotoImage(file = ruta)
@@ -93,15 +93,13 @@ logoref=''
 newImagen= []
 def recargaInfo():
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Funcionamiento: Recarga los patrocinadores, información de escudería y logos en la pantalla principal
     """
     global newImagen,logoimg,Logo,logoref,EstadoCarro,MainCarro
     newImagen = []
     txtpatro = open("__InfoEscuderías\\patrocinadores.txt")
     l = (txtpatro.readline()).split(":")
+    #carga las imágenes de los patrocinadores basados en un txt cargado por medio de iteracion
     for i in range(0,len(l)):
         newImagen.insert(i,[cargar_imagen(l[i]+'.png')])
         MainCanv.create_image(i*170+200, 600, image = newImagen[i])
@@ -122,10 +120,7 @@ def recargaInfo():
     
 def modificarPatro():
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Funcionamiento: Muestra una ventana que permite ingresar los nombres de los patrocinadores
     """
     modPil = Toplevel()
     modPil.geometry('700x150')
@@ -145,6 +140,9 @@ def modificarPatro():
     
 
     def actualizar():
+        """
+        Funcionamiento: actualiza archivo de texto que guarda patrocinadores
+        """
         txtpatro = open("__InfoEscuderías\\patrocinadores.txt",'w')
         txtpatro.write(text.get())
         txtpatro.close()
@@ -156,10 +154,7 @@ def modificarPatro():
     
 def modificarLogo():
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Funcionamiento: Muestra una ventana que permite ingresar los el nombre del logo a mostrar (nombre de imagen sin extensión)
     """
     modLog = Toplevel()
     modLog.geometry('700x150')
@@ -187,11 +182,8 @@ def modificarLogo():
 recargaInfo()
 
 
-
-
-
-
-
+#    _____________________________________________________________
+#___/Funciones para uso de botones definidos al final del programa
 
 def btn_about():
     Main.withdraw()
@@ -215,10 +207,7 @@ def closeX(widgetObj,parent=''):
 #___/ventana about
 def about_window():
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Funcionamiento: Ventana que muestra información de autores
     """
     AboutText = \
     """
@@ -279,7 +268,8 @@ def about_window():
     About.geometry("700x690")
     About.resizable(width = NO, height = NO)
 
-
+    #    ___________________________________
+    #___/ Definicion de elementos de ventana
     C_About = Canvas(About, width = 1280, height = 720, bg = "#FAFAFA") #Cercano al RGB(255) en los 3 aspectos
     C_About.pack(anchor = NW, fill = Y)
     C_About.FondoAbout = FondoAbout = cargar_imagen("FondoAbout.png")
@@ -329,15 +319,18 @@ def about_window():
 #-----Se termina la venta about y se define la ventana de pruebas
 def test_drive_window(pilotoIndex, parent=Main):
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Entradas: pilotoIndex  - posición de piloto en lista de pilotos.info, parent - ventana que lama a test drive
+    Salidas: pilotoIndex debe ser un piloto con un auto asignado el cual esté disponible
+    Funcionamiento: Ventana encargada de controlar lo que respecta al control de carro, y el gurdado de eficiencia, nivel de batería y sensores
     """
     #Valor inicial de las variables globales para esta ventana
+
+    #toma los datos de piloto y auto a ser utilizados en el test drive
     celebracion = pilotos.getCelebracion(pilotoIndex)
-    
     carro = int(pilotos.info[pilotoIndex][pilotos.iTEMPO])
+
+    #    _______________________________
+    #___/ Chequeo de que el carro este disponible
     deEscuderia = False
     for i in range(0,len(autos.info)):
         if (autos.info[i][autos.iTEMPO] == carro):
@@ -358,10 +351,8 @@ def test_drive_window(pilotoIndex, parent=Main):
     parent.withdraw()
     def closeTestDrive():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: Calcula el nivel de bateria del carro, calcula si el mismo está descargado
+        Cierra la ventana del test drive luego del cálculo y retorna a la ventana de autos y pilotoso
         """
         nonlocal carro
         nonlocal ActiveWindow
@@ -374,6 +365,8 @@ def test_drive_window(pilotoIndex, parent=Main):
         Label(mensaje, text = 'Espere, \n actualizando datos', font = nnFont).pack()
         def getBat():
             try:
+                #    _____________________________________________
+                #___/Calculo de bater[ia antes de cerra test drive
                 response = (send("sense;",True))
                 Answer = (response.split(';'))[0]
                 if "blvl:" in Answer:
@@ -393,7 +386,8 @@ def test_drive_window(pilotoIndex, parent=Main):
         Thread(target=getBat).start()
         
         
-            
+    #    ______________________________________________________________________________________________________
+    #___/ Variables y flags a ser utilizadas en el funcionamiento del test drive y coordinación de comandos      
     Speed = 0
     Moving,WPressed,APressed,SPressed,DPressed,ZPressed,XPressed,CPressed,FPressed,BlinkZ,BlinkC,SentBackON,SentBackOFF = (False,)*13
     FLight = True
@@ -401,10 +395,8 @@ def test_drive_window(pilotoIndex, parent=Main):
     ActiveWindow = True
     BlightCount = 0
     
-    #Valor inicial del auto al entrar a la ventana
-    #send("lb:1;")
-
-    #*****************
+    #    _______________________________________________
+    #___/Definicion de elementos graficos de la ventana
     TestDrive= Toplevel()
     TestDrive.title("Test Drive")
     TestDrive.geometry("1280x720")
@@ -412,12 +404,14 @@ def test_drive_window(pilotoIndex, parent=Main):
     #Se genera el canvas de la ventana de pruebas
     TestCanv= Canvas(TestDrive, width= 1280, height= 720,bg="black")
     TestCanv.place(x=0, y=0)
-
+    #    _______________________________
+    #___/Definición de fondos
     TestDrive.FondoDia = FondoDia = cargar_imagen("DAY.png")
     TestCanv.create_image(0,0,image=FondoDia, anchor = NW,tags = "dia", state = NORMAL)
     TestDrive.FondoNoche =FondoNoche = cargar_imagen("NIGHT.png")
     TestCanv.create_image(0,0,image= FondoNoche, anchor = NW, tags = "noche", state = HIDDEN)
-
+    #    _______________________________
+    #___/Definición de Llantas
     TestDrive.Twl = TopWheelL = cargar_imagen("TLWheel.png")
     TestCanv.create_image(860,240, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
     TestCanv.create_image(932,242, image = TopWheelL, anchor = NW, tags = "tl", state = HIDDEN)
@@ -425,15 +419,22 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestDrive.Twr = TopWheelR = cargar_imagen("TopWheelRight.png")
     TestCanv.create_image(863,240, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
     TestCanv.create_image(940,238, image = TopWheelR, anchor = NW, tags = "tr", state = HIDDEN)
+    #    _______________________________
+    #___/Imagen del carro
     TestDrive.Borde = Borde = cargar_imagen("Car1.png")
     TestCanv.create_image(825,200, image = Borde, anchor = NW,tags = ("fondo","día"))
+
+    #    _______________________________
+    #___/Definición de direccionales y luces frontales
     TestDrive.fl = FrontLight = cargar_imagen("FrontL.png")
     TestCanv.create_image(865,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
     TestCanv.create_image(930,210, image = FrontLight, anchor = NW, tags = ("lights","front"), state = HIDDEN)
     TestDrive.dirl = DirLight = cargar_imagen("EmL.png")
     TestCanv.create_image(840,250, image = DirLight, anchor = NW, tags = ("lights","left"), state = HIDDEN)
     TestCanv.create_image(930,250, image = DirLight, anchor = NW, tags = ("lights","right"), state = HIDDEN)
-    
+
+    #    _______________________________
+    #___/Definición de indicadores de dirección
     TestCanv.dir0  = dir0 = cargar_imagen("Directo.png")
     TestCanv.create_image(635,180, image = dir0, anchor = NE, state = NORMAL)
     TestCanv.create_image(645,180, image = dir0, anchor = NW, state = NORMAL)
@@ -442,17 +443,19 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestCanv.create_image(635,180, image = dirI, anchor = NE,tags = ("tl"), state = HIDDEN)
     TestCanv.create_image(645,180, image = dirD, anchor = NW,tags = ("tr"), state = HIDDEN)
 
-    
+    #    _______________________________
+    #___/Definición de luz trasera
     TestDrive.bl = BackLight= cargar_imagen("BackL.png")
     TestCanv.create_image(855,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
     TestCanv.create_image(905,385, image = BackLight, anchor = NW, tags = ("lights", "back"), state = HIDDEN)
-
+    #    _______________________________
+    #___/Indicador de frenado y reversa
     TestDrive.revON = revON= cargar_imagen("Reversa.png")
     TestDrive.revOff = revOff= cargar_imagen("ReversaOff.png")
     TestCanv.create_image(925,600, image = revOff)
     TestCanv.create_image(925,600, image = revON, tags = ("lights", "back"), state = HIDDEN)
     
-    #-----------------------------------------
+    #----------------------------------------- Información escuderia ---------------------------------------------------------------------------------
     TestCanv.create_text(120,70, text = "Escudería: Loui Vcker",font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
     TestCanv.create_text(120,100, text = ("Marca Auto: "+autos.info[carro][0]),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
     TestCanv.create_text(120,130, text = ("Modelo Auto: "+autos.info[carro][1]),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
@@ -461,12 +464,18 @@ def test_drive_window(pilotoIndex, parent=Main):
     TestCanv.create_text(600,130, text = ("Test Drive 1.0 - Loui Vcker Racing Team"),font = ("Algency FB",18,'bold italic'),fill = "black",tags= "escu", anchor =NW)
     #-----------------------------------------
     
-    
+    #    _______________________________
+    #___/Definición de indicador de PWM
     TestCanv.create_text(620,675, text = "PWM:0%", font= ("Algency FB",18,'bold italic'), fill = "black", tags = "pwm", anchor= NW)
     TestCanv.create_text(220,190, text = "%", font = ("Algency FB",18,'bold italic'), fill = "black", tags = "battext", anchor = NW)
+
+    #carga de imagenes de acelerometro
     TestCanv.AOff = AOff = cargar_imagen('AOff.png')
     TestCanv.GrON = GrON = cargar_imagen('GrON.png')
     TestCanv.ReON = ReON = cargar_imagen('ReOn.png')
+
+    #    ______________________________________
+    #___/ Creacion de imágenes del acelerómetro
     for i in range(0, 6):
         TestCanv.create_image((520+i*57), 580, image = AOff)
     
@@ -480,10 +489,7 @@ def test_drive_window(pilotoIndex, parent=Main):
         #Se debe programar la adición de las operaciones de la función aparte de generar la ventana
     def gradualOff(light):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: apaga gradualmente luces rojas y verdes
         """
         nonlocal cntGreen, cntRed,SPressed, WPressed, Speed,ActiveWindow
         if light == 'GR':
@@ -504,10 +510,7 @@ def test_drive_window(pilotoIndex, parent=Main):
     cntGreen = 0
     def gradualAccGreen():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: Prende luces verdes de acelerómetro conforme se aplica pwm a avanzar
         """
         nonlocal WPressed,cntGreen
         while WPressed:
@@ -526,10 +529,7 @@ def test_drive_window(pilotoIndex, parent=Main):
     cntRed = 0
     def gradualAccRed():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: Prende luces rojas de acelerómetro conforme se aplica pwm a frenar o reversa
         """
         nonlocal SPressed,cntRed
         while SPressed:
@@ -545,7 +545,8 @@ def test_drive_window(pilotoIndex, parent=Main):
                 TestCanv.itemconfig(('Red1'), state = NORMAL)   
                 TestCanv.itemconfig(('Red2'), state = NORMAL)
             
-            
+    #    _______________________________
+    #___/Final de codigo de acelerometro        
 
 
     #Se utiliza el comando del botón atrás para volver a main
@@ -577,10 +578,7 @@ def test_drive_window(pilotoIndex, parent=Main):
     #-----------------------------------------
     def check_sense():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: envia repetidas veces el comando sense para tomar los datos de sensores del auto
         """
         while ActiveWindow:
             Command = myCar.send("sense;")
@@ -948,10 +946,7 @@ def test_drive_window(pilotoIndex, parent=Main):
 
     def ejecutarCelebracion():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Funcionamiento: Ejcuta los comandos de la celebración del piloto
         """
         nonlocal celebracion
         for x in celebracion:
@@ -964,10 +959,8 @@ def test_drive_window(pilotoIndex, parent=Main):
             
     def calcEficiencia():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcion
+        Funcionamiento: envía dos comandos circle al carro, calcula la bateria antes y después, saca la diferencia, y la guarda como la eficiencia
+        del auto
         """
         mensaje = Toplevel(TestDrive)
         mensaje.title('Espere')
@@ -977,6 +970,10 @@ def test_drive_window(pilotoIndex, parent=Main):
         def calcBat():
             nonlocal resultado
             try:
+                #    _______________________________
+                #___/ Comandos y calculos de eficiencia
+                #
+                #Si alguna respuesta es un timeout, cancela el proceso
                 response = (send("sense;",True))
                 Answer = (response.split(';'))[0]
                 BateriaInicial = 0
@@ -1029,6 +1026,8 @@ def test_drive_window(pilotoIndex, parent=Main):
 
     uBG = '#141414'
     txtBG = '#FAFAFA'
+    #    _______________________________
+    #___/Definición de botones
 
     Button(TestDrive, text="Zigzag",font=nnFont, width=10,bg=uBG,fg = txtBG,bd=0,
            command=lambda: send('ZigZag;')).place(x=1125,y=245, anchor = CENTER)
@@ -1084,10 +1083,8 @@ def test_drive_window(pilotoIndex, parent=Main):
 #-----Se termina la ventana de pruebas y se define la de los pilotos
 def pilots_window(parent = Main):
     """
-    Entradas:
-    Salidas:
-    Restricciones:
-    Funcionamiento:
+    Entradas:parent - ventana que la llama
+    Funcionamiento: Ventana de muestra de datos de pilotos
     """
     global pilotos,autos, TTFont, nnFont
     DscRGP, DscREP, DscEficiencia = (False,)*3
@@ -1101,7 +1098,10 @@ def pilots_window(parent = Main):
     uBG = 'black'
     txtBG = '#FAFAFA'
 
-    
+    #    _________________________________________
+    #___/Carga de elementos gráficos principales
+
+    #otros elementos depende de las funciones definidas posteriormente
     C_Pil= Canvas(Pilots,width=1200,height=800,bd=0, highlightthickness=0, bg= uBG)
     #C_Pil.place(relx=0.5,rely=0.5, anchor ='c')
     C_Pil.pack(expand=2, anchor='c', fill=Y)
@@ -1118,10 +1118,9 @@ def pilots_window(parent = Main):
     elements = []
     def cargarPilotos(param):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas:param - indica el parámetro de orden de los pilotos
+        Salidas: recarga la ventana con los pilotos reordenados
+        Funcionamiento: Encuentra el orden actual de los pilotos, los ordena en orden contrario
         """
         global pilotos
         nonlocal elements, DscRGP, DscREP
@@ -1147,6 +1146,7 @@ def pilots_window(parent = Main):
         fotos=[]
         C_Pil.fotoPil = []
         for i in range(0, len(pilotos.info)):
+            #intenta cargar la foto del piloto, en caso de falla, evita crasheo usando un try except
             try:
                 fotos.insert(i,cargar_imagen(pilotos.info[i][pilotos.iFOTO]))
                 C_Pil.fotoPil.insert(i,fotos[i])
@@ -1159,10 +1159,8 @@ def pilots_window(parent = Main):
     elementsA = []
     def cargarAutos():
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Salidas: recarga la ventana con los autos ordenados por eficiencia
+        Funcionamiento: Encuentra el orden actual de los autos, los ordena en orden contrario
         """
         global autos
         nonlocal elementsA, DscEficiencia
@@ -1179,6 +1177,7 @@ def pilots_window(parent = Main):
         fotos=[]
         C_Pil.fotoAutos=[]
         for i in range(0, len(autos.info)):
+            #intenta cargar la imagen de un auto, si falla la ruta de la imagen, previene el crasheo usando un try except
             try:
                 fotos.insert(i,cargar_imagen(autos.info[i][autos.iFOTO]))
                 C_Pil.fotoAutos.insert(i,fotos[i])
@@ -1193,6 +1192,7 @@ def pilots_window(parent = Main):
     style = ttk.Style(C_Pil)
     style.configure('Treeview', rowheight=70, font = ('Helvetica',13,'bold italic'))
     style.configure('Treeview.Heading', font = ('Helvetica',13,'bold italic'))
+    #-------------------------------------------------------------------------
     #Organizacion del TreeView de Pilotos
     #-------------------------------------------------------------------------
     Frame(C_Pil, height = 70).grid(row=0, columnspan =4)
@@ -1219,11 +1219,13 @@ def pilots_window(parent = Main):
     Frame(C_Pil, height = 20).grid(row=4, columnspan =4)
     C_Pil.create_text(550, 565, text = 'Autos', fill = txtBG, font = TTFont, anchor = NW)
     #labelAutos = Label(C_Pil, text="Autos",bg=txtBG,fg = uBG, font=TTFont).grid(row=4, columnspan=3)
+    #definicion de columnas del treeview
     colsAut = ('Marca','Modelo','Origen','Tempo','Baterias','CPB','VoltPB','Estado','Consumo','Sensores','Peso','Eficiencia')
     listBoxAut = ttk.Treeview(C_Pil,columns=colsAut,height = 5)
     for col in colsAut:
         listBoxAut.heading(col, text=col)
     listBoxAut.heading('Eficiencia', command =lambda : cargarAutos())
+    #define al ancho de los diferentes espacios en el treeview de autos
     for i in range(0, len(colsAut)):
         listBoxAut.column(colsAut[i], width =90, anchor ='c')
     listBoxAut.column('#0', width = 150, anchor = 'c')
@@ -1242,10 +1244,9 @@ def pilots_window(parent = Main):
 
     def agregarPiloto(parent = Pilots):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas: parent  - ventana pariente
+        Funcionamiento: Recibe los nuevos datos de un piloto a agregar, crea una celebración random, y lo integra dentro de la lista de pilotos
+        cierra la ventana creada al enviar los datos
         """
         nonlocal cols
         parent.withdraw()
@@ -1274,10 +1275,14 @@ def pilots_window(parent = Main):
         hojaTec.insert(0, entryText)
         
         def enviar():
+            """
+            Funcionamiento: Guarda los datos extraídos de la ventana creada por agregarPiloto
+            """
             global pilotos
             nonlocal hojaTec, closeAP
             
             def createCeleb():
+                #crea una celebración random
                 newCeleb = "pwm=0"
                 for x in range(0,5):
                     mov = randint(0, 5)
@@ -1321,10 +1326,10 @@ def pilots_window(parent = Main):
 
     def modificarPiloto(piloto, parent = Pilots):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas: piloto  - Información del item de treeview que conserva la información de un piloto, con su posición en la primer posición de la lista
+        parent- ventana padre
+        Funcionamiento: toma los datos del treeview de un piloto, permite modificarlos, los guarda al presionar el boton de guardado
+        y se cierra al finalizar
         """
         if piloto == []:
             return
@@ -1345,6 +1350,8 @@ def pilots_window(parent = Main):
             cargarPilotos(pilotos.CURRENTORDER)
             
         hojaTec= []
+        #    ______________________________________________
+        #___/obtiene los datos de los entries usando un for
         for i in range(1,len(cols)-2):
             Label(CAP, text = cols[i]).place(x=5,y=(20*i)+20)
             entryText=Entry(CAP,width=30, justify = CENTER)
@@ -1388,10 +1395,11 @@ def pilots_window(parent = Main):
 
     def agregarAuto(parent = Pilots):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas: parent - ventana que lo llama
+        Salidas: agregar auto a la lista autos.info
+        Restricciones: datos deben ser permitidos segun las reglas de autos.info
+        Funcionamiento: crea una ventana para ingresar los datos, al presionar agregar, agrega el auto y cierra la ventana
+        para volver a la ventana padre
         """
         nonlocal colsAut
         parent.withdraw()
@@ -1408,6 +1416,8 @@ def pilots_window(parent = Main):
             cargarAutos()
             
         hojaTec= []
+        #    _______________________________
+        #___/obtiene los datos de los entries usando un for
         for i in range(0,len(colsAut)):
             Label(CAP, text = colsAut[i]).place(x=5,y=(20*(i+1))+20)
             entryText=Entry(CAP,width=30, justify = CENTER)
@@ -1420,12 +1430,13 @@ def pilots_window(parent = Main):
         hojaTec.append(entryText)   
         
         def enviar():
-            global pilotos
+            global autos
             nonlocal hojaTec, closeAP
             
             newData = []
             for x in hojaTec:
                 newData.append(x.get())
+            #cambia la posicion de ruta de foto del final de la lista a la posicion definida segun las reglas de auto.info
             newData.insert(autos.iFOTO, newData[-1])
             newData.pop(-1)
             tuple(newData)
@@ -1444,10 +1455,12 @@ def pilots_window(parent = Main):
 
     def modificarAuto(Auto,pos, parent = Pilots):
         """
-        Entradas:
-        Salidas:
-        Restricciones:
-        Funcionamiento:
+        Entradas: auto - lista de informacion de auto a modificar, pos  - posicion de auto en autos.info
+        parent  - ventana padre
+        Salidas: guardado de los datos modificados de un carro en autos.info
+        Restricciones: Los datos de modificación deben ser validos según las reglas de autos.info
+        Funcionamiento: Toma los datos del treeview del auto seleccionado, los muestra en entries
+        de tkinter, permite modificarlos, y al preisonar guardar permite guardarlos
         """
         if Auto == []:
             return
@@ -1499,7 +1512,8 @@ def pilots_window(parent = Main):
         Btn_cerrar = Button(CAP, width=25,text="Cerrar",command=closeAP).place(x = 10, y=5)
         Btn_agregar = Button(CAP, width=25,text="Guardar",command=enviar).place(x = 10, y = 300)
         
-
+    #    _________________________________________
+    #___/ Definiciones de botones de Pilots window
     Btn_modificar = Button(C_Pil, text = "modificar información",font=nnFont, width = 25,bg=uBG,fg = txtBG,bd=0,
                            command = lambda: modificarPiloto(list(listBox.item(listBox.selection(),'values')))).grid(row= 2, column =2)
     
@@ -1539,7 +1553,8 @@ def pilots_window(parent = Main):
 
 
 
-    
+#    _______________________________
+#___/definicion de botones de main    
   
 #------Comandos de los Botones en Main------
 BtnAbout= Button(MainCanv, text= "Información",font = TTFont, command = btn_about,fg= "#FAFAFA",bg ="black") #Para ir a About
